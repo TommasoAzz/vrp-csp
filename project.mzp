@@ -1,0 +1,76 @@
+{
+    "builtinSolverConfigs": [
+        {
+            "additionalCompilerCommandline": "",
+            "additionalData": "",
+            "clearOutputWindow": false,
+            "compressSolutionOutput": 100,
+            "defaultBehavior": false,
+            "extraOptions": {
+                "-a-d": "2",
+                "-c-d": "8",
+                "-decay": "0.99",
+                "-fail": "0",
+                "-node": "0",
+                "-nogoods": "false",
+                "-nogoods-limit": "128",
+                "-restart": "none",
+                "-restart-base": "1.5",
+                "-restart-scale": "250"
+            },
+            "flatteningStats": false,
+            "freeSearch": false,
+            "id": "org.gecode.gecode",
+            "nThreads": 1,
+            "name": "Gecode 6.1.1",
+            "optimizationLevel": 1,
+            "outputTiming": false,
+            "printIntermediate": false,
+            "runSolutionChecker": true,
+            "solverFlags": "",
+            "solvingStats": true,
+            "stopAfter": 1,
+            "timeLimit": 300,
+            "useExtraOptions": false,
+            "verboseFlattening": false,
+            "verboseSolving": false,
+            "version": "6.1.1"
+        }
+    ],
+    "openFiles": [
+        "model.mzn",
+        "instances/pr01.dzn",
+        "instances/pr02.dzn",
+        "instances/pr03.dzn",
+        "instances/pr04.dzn",
+        "instances/pr05.dzn",
+        "instances/pr06.dzn",
+        "instances/pr07.dzn",
+        "instances/pr08.dzn",
+        "instances/pr09.dzn",
+        "instances/pr10.dzn",
+        "instances/pr11.dzn",
+        "instances/example.dzn"
+    ],
+    "openTab": 12,
+    "projectFiles": [
+        "instances/example.dzn",
+        "instances/pr01.dzn",
+        "instances/pr02.dzn",
+        "instances/pr03.dzn",
+        "instances/pr04.dzn",
+        "instances/pr05.dzn",
+        "instances/pr06.dzn",
+        "instances/pr07.dzn",
+        "instances/pr08.dzn",
+        "instances/pr09.dzn",
+        "instances/pr10.dzn",
+        "instances/pr11.dzn",
+        "model.mzn"
+    ],
+    "projectSolverConfigs": [
+    ],
+    "selectedBuiltinConfigId": "org.gecode.gecode",
+    "selectedBuiltinConfigVersion": "6.1.1",
+    "version": 105
+}
