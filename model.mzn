@@ -2,6 +2,10 @@
 % Marco Ferrati, Tommaso Azzalin
 
 include "alldifferent_except_0.mzn";
+include "bin_packing_capa.mzn";
+include "bin_packing.mzn";
+include "knapsack.mzn";
+include "path.mzn";
 
 % Parameters
 % > Dataset name
@@ -20,7 +24,7 @@ array [dom_veh] of int: Capacity; % Capacity of vehicle j, j in 1..NumVehicles.
 
 % Variables
 array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
-array [1..n+2, dom_veh] of var 1..n+2: routes; % routes[i,j] <-> vehicle j visited customer i as the (routes[i,j])-th visit
+array [1..n+2, dom_veh] of var 0..n+2: routes; % routes[i,j] <-> vehicle j visited customer i as the (routes[i,j])-th visit
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
@@ -33,8 +37,31 @@ constraint forall(i in 1..n+2, j in dom_veh)(if(i == n+1) then routes[i,j] = 1 e
 
 constraint forall(i in 1..n)(alldifferent_except_0([routes[i,j] | j in dom_veh])::domain); % Only a vehicle can visit a customer (Hamiltonian cycle condition).
 
+% Implied constraints
+constraint sum(d in Demand)(d) <= sum(c in Capacity)(c);
+
+% Problem constraints
+
+int: num_nodi = n+2;
+int: num_archi = round(((num_nodi*(num_nodi-1))/2))-1;
+array[int] of int: partenza = [i | i in 1..n+2, j in 1..n+1 where (i<=j /\ i != n+1)];
+array[int] of int: arrivo = [j | i in 1..n+2, j in 1..n+2 where (i<j /\ i != n+1)];
+
+array[1..num_nodi] of var bool: visited_nodes;
+array[1..num_archi] of var bool: visited_edges;
+
+constraint forall(v in visited_nodes)(v);
+constraint path(num_nodi, num_archi, partenza, arrivo, n+1, n+2, visited_nodes, visited_edges);
+
+% Output
 output [
 "Dataset: \(Name)\n",
 "Total number of customers: \(n)\n",
-"Depot coordinates: (\(locX[n+1]), \(locY[n+1]))"
+"Depot coordinates: (\(locX[n+1]), \(locY[n+1]))\n",
+"Routes:\n"
 ];
+output [show(routes[i, j]) ++ if j == NumVehicles then "\n" else "  " endif | i in 1..n+2, j in dom_veh];
+output ["\(visited_nodes)\n"];
+output [show(partenza), "\n"];
+output [show(arrivo), "\n"];
+output [show([if visited_edges[k]==true then 1 else 0 endif | k in 1..num_archi])];
