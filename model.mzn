@@ -21,14 +21,14 @@ array [dom_veh] of int: Capacity; % Capacity of vehicle j, j in 1..NumVehicles.
 
 % Variables
 array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
-array [1..n+2, dom_veh] of var 0..n+2: routes; % routes[i,j] <-> vehicle j visited customer i as the (routes[i,j])-th visit
+array [1..n+2, dom_veh] of var 0..n+2: routes; % routes[i,j] <-> vehicle j visited customer i as the (routes[i,j])-th visit %TODO: serve?
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
   round(sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2)) * 1000);
 
 % Initialization constraints
-constraint forall(c1, c2 in 1..n+1 where c1 < c2)(distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2])); % Computing distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
+constraint forall(c1, c2 in 1..n+1)(distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2])); % Computing distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute. %TODO: migliorare con if
 
 constraint forall(i in 1..n+2, j in dom_veh)(if(i == n+1) then routes[i,j] = 1 else routes[i,j] = 0 endif); % All vehicles start their route from the depot (aka customer n+1); if routes[i,j] is zero it means that vehicle j did not visit customer i.
 
@@ -58,12 +58,23 @@ constraint forall(v in dom_veh) (
 constraint forall(v in dom_veh) (
   sum(node in 1..num_nodes-2 where visited_nodes[v, node]) (Demand[node]) <= Capacity[v]
 );
+/*
+var int: obj = sum(v in dom_veh)( 
+  sum(e in 1..num_edges where visited_edges[v, e])
+    (distances[if starting_from[e] == n+2 then n+1 else starting_from[e] endif, if ending_to[e] == n+2 then n+1 else starting_from[e] endif])
+);
+*/
+var int: obj = sum(v in dom_veh, e in 1..num_edges where visited_edges[v, e])
+    (distances[if starting_from[e] == n+2 then n+1 else starting_from[e] endif, if ending_to[e] == n+2 then n+1 else starting_from[e] endif]);
+
+output["\(obj)\n"];
 
 % Output
 output [
 "Dataset: \(Name)\n",
 "Total number of customers: \(n)\n",
 "Depot coordinates: (\(locX[n+1]), \(locY[n+1]))\n",
+"Distances: \(distances)"
 ];
 
 output[
@@ -74,8 +85,3 @@ output[
 "\([if visited_edges[v, k]==true then 1 else 0 endif | k in 1..num_edges])" ++
 "\n\n" | v in dom_veh
 ]
-%output [show(routes[i, j]) ++ if j == NumVehicles then "\n" else "  " endif | i in 1..n+2, j in dom_veh];
-%output ["\(visited_nodes)\n"];
-%output [show(starting_from), "\n"];
-%output [show(ending_to), "\n"];
-%output [show([if visited_edges[k]==true then 1 else 0 endif | k in 1..num_edges])];
