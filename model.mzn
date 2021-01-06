@@ -2,9 +2,6 @@
 % Marco Ferrati, Tommaso Azzalin
 
 include "alldifferent_except_0.mzn";
-include "bin_packing_capa.mzn";
-include "bin_packing.mzn";
-include "knapsack.mzn";
 include "path.mzn";
 
 % Parameters
@@ -42,26 +39,40 @@ constraint sum(d in Demand)(d) <= sum(c in Capacity)(c);
 
 % Problem constraints
 
-int: num_nodi = n+2;
-int: num_archi = round(((num_nodi*(num_nodi-1))/2))-1;
-array[int] of int: partenza = [i | i in 1..n+2, j in 1..n+1 where (i<=j /\ i != n+1)];
-array[int] of int: arrivo = [j | i in 1..n+2, j in 1..n+2 where (i<j /\ i != n+1)];
+int: num_nodes = n+2;
+int: num_edges = round(((num_nodes*(num_nodes-1))/2))-1;
+array[int] of int: starting_from = [i | i in 1..n+2, j in 1..n+1 where (i<=j /\ i != n+1)];
+array[int] of int: ending_to = [j | i in 1..n+2, j in 1..n+2 where (i<j /\ i != n+1)];
 
-array[1..num_nodi] of var bool: visited_nodes;
-array[1..num_archi] of var bool: visited_edges;
+array[dom_veh, 1..num_nodes] of var bool: visited_nodes;
+array[dom_veh, 1..num_edges] of var bool: visited_edges;
 
-constraint forall(v in visited_nodes)(v);
-constraint path(num_nodi, num_archi, partenza, arrivo, n+1, n+2, visited_nodes, visited_edges);
+constraint forall(node in 1..num_nodes-2)(
+  sum(vehicle in dom_veh)(visited_nodes[vehicle, node]) == 1
+);
+
+constraint forall(v in dom_veh) (
+  path(num_nodes, num_edges, starting_from, ending_to, n+1, n+2, [visited_nodes[v, i] | i in 1..num_nodes], [visited_edges[v, i] | i in 1..num_edges])
+);
+
+constraint forall(v in dom_veh) (
+  sum(node in 1..num_nodes-2 where visited_nodes[v, node]) (Demand[node]) <= Capacity[v]
+);
 
 % Output
 output [
 "Dataset: \(Name)\n",
 "Total number of customers: \(n)\n",
 "Depot coordinates: (\(locX[n+1]), \(locY[n+1]))\n",
-"Routes:\n"
 ];
-output [show(routes[i, j]) ++ if j == NumVehicles then "\n" else "  " endif | i in 1..n+2, j in dom_veh];
-output ["\(visited_nodes)\n"];
-output [show(partenza), "\n"];
-output [show(arrivo), "\n"];
-output [show([if visited_edges[k]==true then 1 else 0 endif | k in 1..num_archi])];
+
+output[
+"Vehicle \(v): capacity=\(Capacity[v])\n" ++ 
+"\([if visited_nodes[v, k] then "\(k)" else "" endif | k in 1..num_nodes-2])" ++ 
+"\n\n" | v in dom_veh
+]
+%output [show(routes[i, j]) ++ if j == NumVehicles then "\n" else "  " endif | i in 1..n+2, j in dom_veh];
+%output ["\(visited_nodes)\n"];
+%output [show(starting_from), "\n"];
+%output [show(ending_to), "\n"];
+%output [show([if visited_edges[k]==true then 1 else 0 endif | k in 1..num_edges])];
