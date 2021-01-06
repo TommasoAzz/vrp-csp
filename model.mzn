@@ -68,7 +68,10 @@ output [
 
 output[
 "Vehicle \(v): capacity=\(Capacity[v])\n" ++ 
-"\([if visited_nodes[v, k] then "\(k)" else "" endif | k in 1..num_nodes-2])" ++ 
+"\([if visited_nodes[v, k] then "\(k)" else "" endif | k in 1..num_nodes-2])\n" ++ 
+"\(starting_from)\n" ++
+"\(ending_to)\n" ++
+"\([if visited_edges[v, k]==true then 1 else 0 endif | k in 1..num_edges])" ++
 "\n\n" | v in dom_veh
 ]
 %output [show(routes[i, j]) ++ if j == NumVehicles then "\n" else "  " endif | i in 1..n+2, j in dom_veh];
