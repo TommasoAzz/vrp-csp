@@ -22,7 +22,8 @@ array [dom_veh] of int: Capacity; % Capacity of vehicle j, j in dom_veh.
 
 % Variables and variable-related constants
 int: num_nodes = n+2; % There are n customers and one depot. The depot is split into the depot starting point (n+1) and the depot finishing point (n+2).
-int: num_edges = round(((num_nodes * (num_nodes - 1)) / 2)); % Total numbers of possible edges in a complete graph. The "-1" removes the edge (n+1,n+2) between the depot starting and finishing points, since it is the same node.
+int: num_edges = round(((num_nodes * (num_nodes - 1)) / 2)); % Total numbers of possible edges in a complete graph.
+% (REMOVED: The "-1" removes the edge (n+1,n+2) between the depot starting and finishing points, since it is the same node.)
 
 array[int] of int: starting_points = [i | i in 1..n+1, j in 1..n+1 where i <= j]; % Edges' starting points.
 array[int] of int: ending_points = [j | i in 1..n+1, j in 2..n+2 where i < j]; % Edges' finishing points.
