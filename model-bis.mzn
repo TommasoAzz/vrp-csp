@@ -27,7 +27,14 @@ int: num_nodes = n+2; % There are n customers and one depot. The depot is split 
 
 array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
 
-array[1..num_nodes, dom_veh] of var 1..num_nodes: next;
+array [dom_veh] of var 1..num_nodes: next_after_start; % The first node that is visited after a vehicle has left the depot.
+% TODO: Creare la variante di next_after_start con dominio 1..n+1 (n+2 è ridondante forse)
+
+array [1..n] of var 1..num_nodes: next; % next[i] = n <-> some vehicle visits node n after visiting node i.
+
+array [1..n] of var dom_veh: visit; % visit[i] = v <-> node i is visited by vehicle v.
+
+array [1..n] of var bool: visited_nodes; % visited_nodes[i] <-> i in next_after_start \/ i in next.
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
@@ -36,20 +43,29 @@ function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
 % Initialization constraints
 constraint forall(c1, c2 in 1..n+1 where c1 <= c2)(if(c1 < c2) then distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2]) else distances[c1, c2] = 0 endif); % Computes the distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
 
-% NEW CONSTRAINT
-constraint forall(j in dom_veh)(next[n+2, j] = n+1); % Linking between an end visit by a vehicle to the next start visit from another vehicle (part 1)
-
 % Implied constraints
 constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the customers' demands must be lesser or equal than the available capacity of the vehicles otherwise the problem is unsatisfiable.
 
 % Problem constraints
-% NEW
-constraint alldifferent_except([next[i,j] | i in 1..num_nodes, j in dom_veh], {n+1, n+2})::domain;
+constraint alldifferent_except(next_after_start, {n+2})::domain;
 
-% NEW
-constraint at_most(NumVehicles, [{next[i,j]} | i in 1..num_nodes, j in dom_veh], {n+1})::domain;
+constraint forall(i in 1..n)(next[i] != i); % After visiting i a vehicle cannot visit i again.
 
-constraint at_most(NumVehicles, [{next[i,j]} | i in 1..num_nodes, j in dom_veh], {n+2})::domain;
+% TODO: Remove this constraint.
+constraint forall(v in dom_veh)(next_after_start[v] != n+1); % After leaving the depot entry vehicle v cannot go to the vehicle entry.
+
+constraint alldifferent_except(next, {n+2})::domain;
+
+constraint forall(i in 1..n)(visited_nodes[i]);
+
+constraint forall(i in 1..n)(visited_nodes[i] <-> (count(next, i) + count(next_after_start, i) == 1));
+
+constraint count(next, n+2) == sum(v in dom_veh)(next_after_start[v] != n+2);
+
+constraint forall(v in dom_veh)(sum([Demand[i] | i in 1..n where visit[i] == v]) <= Capacity[v]);
+
+% constraint forall(i in 1..n, v in dom_veh)(visit[i] = v <-> next_after_start[v] = i);
+
 
 % Objective values
 % > Distance
@@ -57,29 +73,12 @@ constraint at_most(NumVehicles, [{next[i,j]} | i in 1..num_nodes, j in dom_veh],
 % > Vehicles
 0..10: used_vehicles_weigth = 0;
 
-% Output
-% > Input data and output of the problem (objective function)
-output [
-"Dataset: \(Name)\n",
-"------------------\n",
-"Total number of customers: \(n)\n",
-"Depot coordinates: (\(locX[n+1]), \(locY[n+1]))\n",
-% "Total distance travelled by vehicles: \(total_distance)\n",
-% "Number of vehicles that were moved: \(used_vehicles)\n"
-];
+output["next_after_start" ++ show(next_after_start)];
 
 output ["\n"];
 
-output ["Distances between nodes\n"];
-output ["\(i) -> \(j) = " ++ "\(distances[i,j])\n" | i,j in 1..n+1 where i<j];
+output["next" ++ show(next)];
 
 output ["\n"];
 
-output[
-"Vehicle " ++ show_int(3, v) ++ " with capacity: " ++ show_int(3, Capacity[v]) ++ "\n" ++ 
-"------------------------------\n" ++
-% "- served customers: " ++ show([k | k in 1..n where visited_nodes[v, k]]) ++ "\n" ++ 
-"- passed through:\n\t- " ++ 
-% show(["\(starting_points[k]) -> \(ending_points[k])" | k in 1..num_edges where visited_edges[v, k]]) ++
-"\n\n" | v in dom_veh
-]
+output["visit" ++ show(visit)]
