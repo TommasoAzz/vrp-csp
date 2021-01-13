@@ -1,6 +1,7 @@
 {
     "openFiles": [
         "model.mzn",
+        "model-bis.mzn",
         "instances/pr01.dzn",
         "instances/pr02.dzn",
         "instances/pr03.dzn",
@@ -12,11 +13,13 @@
         "instances/pr09.dzn",
         "instances/pr10.dzn",
         "instances/pr11.dzn",
-        "instances/example.dzn"
+        "instances/example.dzn",
+        "instances/mini-example.dzn"
     ],
     "openTab": 0,
     "projectFiles": [
         "instances/example.dzn",
+        "instances/mini-example.dzn",
         "instances/pr01.dzn",
         "instances/pr02.dzn",
         "instances/pr03.dzn",
@@ -28,6 +31,7 @@
         "instances/pr09.dzn",
         "instances/pr10.dzn",
         "instances/pr11.dzn",
+        "model-bis.mzn",
         "model.mzn",
         "solver.mpc"
     ],
