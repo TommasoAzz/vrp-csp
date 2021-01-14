@@ -59,7 +59,8 @@ constraint alldifferent_except(array1d(next), {0, n+1});
 constraint among(NumVehicles, array1d(next), {n+1});
 
 constraint forall(i in 1..n+1, v in dom_veh)(
-  (next[i, v] > 0 <-> (next[next[i, v], v] > 0 /\ next[next[i, v], v] != i)) /\ %if vehicle v vists node i then the same vehicle must visit next[i, v]
+  (next[i, v] > 0 <-> next[next[i, v], v] > 0) /\ %if vehicle v vists node i then the same vehicle must visit next[i, v]
+  (next[next[i, v], v] = i -> count([next[j, v] | j in 1..n+1], 0) == n-1) /\
   next[i, v] != i % After visiting a node, next[i, v] can't be the same node
 );
 
