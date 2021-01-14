@@ -1,12 +1,7 @@
 % Vehicle Routing Problem in CSP
 % Marco Ferrati, Tommaso Azzalin
-
-include "alldifferent_except_0.mzn";
+include "globals.mzn";
 include "alldifferent_except.mzn";
-include "path.mzn";
-include "among.mzn";
-include "cumulative.mzn";
-include "at_most.mzn";
 
 % Parameters
 % > Dataset name
@@ -28,14 +23,8 @@ int: num_nodes = n+1; % There are n customers and one depot. The depot is split 
 
 array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
 
-array [dom_veh] of var 1..num_nodes: next_after_start; % The first node that is visited after a vehicle has left the depot.
-% TODO: Creare la variante di next_after_start con dominio 1..n+1 (n+2 è ridondante forse)
+array [1..n+1, dom_veh] of var 0..n+1: next;
 
-array [1..n] of var 1..num_nodes: next; % next[i] = n <-> some vehicle visits node n after visiting node i.
-
-array [1..n] of var dom_veh: visit; % visit[i] = v <-> node i is visited by vehicle v.
-
-array [1..n] of var bool: visited_nodes; % visited_nodes[i] <-> i in next_after_start \/ i in next.
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
@@ -48,24 +37,31 @@ constraint forall(c1, c2 in 1..n+1 where c1 <= c2)(if(c1 < c2) then distances[c1
 constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the customers' demands must be lesser or equal than the available capacity of the vehicles otherwise the problem is unsatisfiable.
 
 % Problem constraints
-constraint alldifferent_except(next_after_start, {n+1})::domain;
 
-constraint forall(i in 1..n)(next[i] != i); % After visiting i a vehicle cannot visit i again.
+% Every vehicles must either leave the depot or stay in it
+constraint alldifferent_except([next[n+1, v] | v in dom_veh], {n+1}); % From the depot every vehicles leaves for one node (can go to the end-depot)
+constraint among(0, [next[n+1, v] | v in dom_veh], {0}); % 0 is not allowed in this row since every vehicle must do something
 
-% TODO: Remove this constraint.
-% constraint forall(v in dom_veh)(next_after_start[v] != n+1); % After leaving the depot entry vehicle v cannot go to the vehicle entry.
+% A node must be visited exactly from one vehicle
+constraint forall(i in 1..n)(
+  among(NumVehicles-1, [next[i, v] | v in dom_veh], {0})
+);
 
-constraint alldifferent_except(next, {n+1})::domain;
+% A vehicle can vist a node only once
+constraint forall(v in dom_veh)(
+  alldifferent_except_0([next[i, v] | i in 1..n+1])
+);
 
-constraint forall(i in 1..n)(visited_nodes[i]); % Every nodes must be visited
+% The matrix can't have repeated elements except for 0 and for n+1 (the depot)
+constraint alldifferent_except(array1d(next), {0, n+1});
 
-constraint forall(i in 1..n)(visited_nodes[i] <-> (count(next, i) + count(next_after_start, i) == 1));
+% In the matrix there must be exactly NumVehicles visits to the depot
+constraint among(NumVehicles, array1d(next), {n+1});
 
-constraint count(next, n+1) == sum(v in dom_veh)(next_after_start[v] != n+1);
-
-constraint forall(v in dom_veh)(sum([Demand[i] | i in 1..n where visit[i] == v]) <= Capacity[v]);
-
-% constraint forall(i in 1..n, v in dom_veh)(visit[i] = v <-> next_after_start[v] = i);
+constraint forall(i in 1..n+1, v in dom_veh)(
+  (next[i, v] > 0 <-> (next[next[i, v], v] > 0 /\ next[next[i, v], v] != i)) /\ %if vehicle v vists node i then the same vehicle must visit next[i, v]
+  next[i, v] != i % After visiting a node, next[i, v] can't be the same node
+);
 
 
 % Objective values
@@ -73,13 +69,5 @@ constraint forall(v in dom_veh)(sum([Demand[i] | i in 1..n where visit[i] == v])
 0..10: total_distance_weigth = 10;
 % > Vehicles
 0..10: used_vehicles_weigth = 0;
-
-output["next_after_start" ++ show(next_after_start)];
-
-output ["\n"];
-
-output["next" ++ show(next)];
-
-output ["\n"];
-
-output["visit" ++ show(visit)]
+output["  1:"];
+output [if (v mod NumVehicles == 0) then show_int(3, next[i, v]) ++ "\n"++ show_int (3, i+1)++":" else show_int(3, next[i, v]) ++" " endif | i in 1..n+1, v in dom_veh];
