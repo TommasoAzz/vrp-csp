@@ -23,8 +23,7 @@ int: num_nodes = n+1; % There are n customers and one depot. The depot is split 
 
 array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
 
-array [1..n+1, dom_veh] of var 0..n+1: next;
-
+array [1..n+1, dom_veh] of var 0..n+1: next; % next[i, j] = n <-> n is the next visit of vehicle j after visiting node i 
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
@@ -47,13 +46,14 @@ constraint forall(i in 1..n)(
   among(NumVehicles-1, [next[i, v] | v in dom_veh], {0})
 );
 
-% A vehicle can vist a node only once
-constraint forall(v in dom_veh)(
-  alldifferent_except_0([next[i, v] | i in 1..n+1])
-);
+% A node can be visited only once
+constraint global_cardinality(array1d(next), set2array(1..n), [1 | i in 1..n]);  
+%constraint forall(v in dom_veh)(
+%  alldifferent_except_0([next[i, v] | i in 1..n+1])
+%);
 
 % The matrix can't have repeated elements except for 0 and for n+1 (the depot)
-constraint alldifferent_except(array1d(next), {0, n+1});
+%constraint alldifferent_except(array1d(next), {0, n+1});
 
 % In the matrix there must be exactly NumVehicles visits to the depot
 constraint among(NumVehicles, array1d(next), {n+1});
