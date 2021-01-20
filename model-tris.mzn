@@ -32,6 +32,16 @@ function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
 % Initialization constraints
 constraint forall(c1, c2 in 1..n+1 where c1 <= c2)(if(c1 < c2) then distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2]) else distances[c1, c2] = 0 endif); % Computes the distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
 
+% Objective values
+% > Distance
+0..10: total_distance_weigth = 10;
+var int: total_distance = sum(v in dom_veh, i in 1..n+1 where next[i,v] != 0)(distances[i,next[i,v]]); % Total distance travelled by the vehicles.
+% > Vehicles
+0..10: used_vehicles_weigth = 0;
+var int: used_vehicles = NumVehicles - count([next[n+1, v] | v in dom_veh], n+1); % Total number of vehicles that leave the depot.
+% > Function to minimize
+var int: obj_f = total_distance_weigth * total_distance + used_vehicles_weigth * used_vehicles;
+
 % Implied constraints
 constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the customers' demands must be lesser or equal than the available capacity of the vehicles otherwise the problem is unsatisfiable.
 
@@ -64,11 +74,13 @@ constraint forall(i in 1..n+1, v in dom_veh)(
   next[i, v] != i % After visiting a node, next[i, v] can't be the same node
 );
 
+% TODO: constraint to allow vehicles not to leave the depot.
 
-% Objective values
-% > Distance
-0..10: total_distance_weigth = 10;
-% > Vehicles
-0..10: used_vehicles_weigth = 0;
+% TODO: constraint to deny inner loops in nodes between [1,n].
+constraint forall(v in dom_veh)(sum(i in 1..n where next[i,v] > 0)(Demand[i]) <= Capacity[v]);
+
+% Solving configuration
+solve minimize obj_f;
+
 output["  1:"];
 output [if (v mod NumVehicles == 0) then show_int(3, next[i, v]) ++ "\n"++ show_int (3, i+1)++":" else show_int(3, next[i, v]) ++" " endif | i in 1..n+1, v in dom_veh];
