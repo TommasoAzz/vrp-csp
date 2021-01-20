@@ -48,16 +48,16 @@ constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the 
 % Problem constraints
 
 % Every vehicles must either leave the depot or stay in it
-constraint alldifferent_except([next[n+1, v] | v in dom_veh], {n+1}); % From the depot every vehicles leaves for one node (can go to the end-depot)
-constraint among(0, [next[n+1, v] | v in dom_veh], {0}); % 0 is not allowed in this row since every vehicle must do something
+constraint alldifferent_except([next[n+1, v] | v in dom_veh], {n+1})::domain; % From the depot every vehicles leaves for one node (can go to the end-depot)
+constraint among(0, [next[n+1, v] | v in dom_veh], {0})::domain; % 0 is not allowed in this row since every vehicle must do something
 
 % A node must be visited exactly from one vehicle
 constraint forall(i in 1..n)(
-  among(NumVehicles-1, [next[i, v] | v in dom_veh], {0})
+  among(NumVehicles-1, [next[i, v] | v in dom_veh], {0})::domain
 );
 
 % A node can be visited only once
-constraint global_cardinality(array1d(next), set2array(1..n), [1 | i in 1..n]);  
+constraint global_cardinality(array1d(next), set2array(1..n), [1 | i in 1..n])::domain;  
 %constraint forall(v in dom_veh)(
 %  alldifferent_except_0([next[i, v] | i in 1..n+1])
 %);
@@ -66,7 +66,7 @@ constraint global_cardinality(array1d(next), set2array(1..n), [1 | i in 1..n]);
 %constraint alldifferent_except(array1d(next), {0, n+1});
 
 % In the matrix there must be exactly NumVehicles visits to the depot
-constraint among(NumVehicles, array1d(next), {n+1});
+constraint among(NumVehicles, array1d(next), {n+1})::domain;
 
 constraint forall(i in 1..n+1, v in dom_veh)(
   (next[i, v] > 0 <-> next[next[i, v], v] > 0) /\ %if vehicle v vists node i then the same vehicle must visit next[i, v]
