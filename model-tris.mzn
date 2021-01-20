@@ -67,20 +67,45 @@ constraint global_cardinality(array1d(next), set2array(1..n), [1 | i in 1..n])::
 
 % In the matrix there must be exactly NumVehicles visits to the depot
 constraint among(NumVehicles, array1d(next), {n+1})::domain;
-
+/*
 constraint forall(i in 1..n+1, v in dom_veh)(
   (next[i, v] > 0 <-> next[next[i, v], v] > 0) /\ %if vehicle v vists node i then the same vehicle must visit next[i, v]
   (next[next[i, v], v] = i -> count([next[j, v] | j in 1..n+1], 0) == n-1) /\
   next[i, v] != i % After visiting a node, next[i, v] can't be the same node
 );
+*/
+constraint forall(i in 1..n+1, v in dom_veh)(
+  (next[i, v] > 0 <-> next[next[i, v], v] > 0) 
+); %if vehicle v visits node i then the same vehicle must visit next[i, v]
+/*
+constraint forall(i in 1..n+1, v in dom_veh)(
+  next[next[i, v], v] = i -> among(n-1, [next[j, v] | j in 1..n+1], {0})::domain 
+); % if vehicle v visits just one node and then come back then number of 0 must be n-1
+*/
+constraint forall(v in dom_veh)((next[next[n+1, v], v] = n+1 /\ next[n+1, v] != n+1) <-> among(n-1, [next[j, v] | j in 1..n], {0})::domain);
+
+constraint forall(v in dom_veh)(next[n+1, v] = n+1 <-> among(n, [next[j, v] | j in 1..n], {0})::domain);
+
+constraint forall(i in 1..n/*+1*/, v in dom_veh)(
+  next[i, v] != i
+); % After visiting a node, next[i, v] can't be the same node
+
+%constraint next[n+1, 2] = n+1;
 
 % TODO: constraint to allow vehicles not to leave the depot.
 
 % TODO: constraint to deny inner loops in nodes between [1,n].
-constraint forall(v in dom_veh)(sum(i in 1..n where next[i,v] > 0)(Demand[i]) <= Capacity[v]);
+
+constraint forall(v in dom_veh)(sum(i in 1..n where next[i,v] > 0)(Demand[i]) <= Capacity[v]); % Each vehicle can visit only nodes that do not exceed its capacity.
 
 % Solving configuration
-solve minimize obj_f;
+% solve minimize obj_f;
 
-output["  1:"];
-output [if (v mod NumVehicles == 0) then show_int(3, next[i, v]) ++ "\n"++ show_int (3, i+1)++":" else show_int(3, next[i, v]) ++" " endif | i in 1..n+1, v in dom_veh];
+output ["  1:"];
+output [
+  if (v mod NumVehicles == 0) then 
+    show_int(3, next[i, v]) ++ "\n" ++ (if(i <= n) then show_int(3, i+1) ++ ":" else "" endif)
+  else
+    show_int(3, next[i, v]) ++" "
+  endif | i in 1..n+1, v in dom_veh
+];
