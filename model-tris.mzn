@@ -24,6 +24,21 @@ int: num_nodes = n+1; % There are n customers and one depot. The depot is split 
 array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
 
 array [1..n+1, dom_veh] of var 0..n+1: next; % next[i, j] = n <-> n is the next visit of vehicle j after visiting node i 
+array [1..n, dom_veh] of var 0..2: visited;
+
+constraint forall(v in dom_veh, i in 1..n)(
+
+  if next[i, v] != 0 /\ visited[i, v] == 0 /\ visited[next[i,v], v] == 0 then
+    visited[i, v] = 1
+  else if visited[next[i, v], v] == 1 then
+    visited[i, v] = 2
+    endif
+  endif
+);
+
+constraint forall(v in dom_veh, i in 1..n)(
+  (next[i, v] > 0) <-> (visited[i, v] = 1 /\ visited[next[i,v], v] = 1)
+);
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
@@ -95,6 +110,8 @@ constraint forall(i in 1..n/*+1*/, v in dom_veh)(
 % TODO: constraint to allow vehicles not to leave the depot.
 
 % TODO: constraint to deny inner loops in nodes between [1,n].
+
+constraint among(0, array1d(visited), {2})::domain;
 
 constraint forall(v in dom_veh)(sum(i in 1..n where next[i,v] > 0)(Demand[i]) <= Capacity[v]); % Each vehicle can visit only nodes that do not exceed its capacity.
 
