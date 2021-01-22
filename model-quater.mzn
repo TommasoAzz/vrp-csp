@@ -67,4 +67,8 @@ constraint forall(i in dom_nodes)(next[i] != i);
 
 constraint next[max(dom_nodes)] == n+1;
 
-output [show(next)];
+constraint circuit(next)::domain;
+
+output [show_int(3, i) | i in dom_nodes];
+output ["\n"];
+output [show_int(3, next[i]) | i in dom_nodes];
