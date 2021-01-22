@@ -27,17 +27,12 @@ array [1..n+1, dom_veh] of var 0..n+1: next; % next[i, j] = n <-> n is the next 
 array [1..n, dom_veh] of var 0..2: visited;
 
 constraint forall(v in dom_veh, i in 1..n)(
-
   if next[i, v] != 0 /\ visited[i, v] == 0 /\ visited[next[i,v], v] == 0 then
     visited[i, v] = 1
   else if visited[next[i, v], v] == 1 then
     visited[i, v] = 2
     endif
   endif
-);
-
-constraint forall(v in dom_veh, i in 1..n)(
-  (next[i, v] > 0) <-> (visited[i, v] = 1 /\ visited[next[i,v], v] = 1)
 );
 
 % Functions
@@ -114,6 +109,35 @@ constraint forall(i in 1..n/*+1*/, v in dom_veh)(
 constraint among(0, array1d(visited), {2})::domain;
 
 constraint forall(v in dom_veh)(sum(i in 1..n where next[i,v] > 0)(Demand[i]) <= Capacity[v]); % Each vehicle can visit only nodes that do not exceed its capacity.
+
+int: num_edges = round(((num_nodes * n) / 2)); % Total numbers of possible edges in a complete graph.
+
+array[int] of int: starting_points = [i | i in 1..n, j in 1..n where i <= j]; % Edges' starting points.
+array[int] of int: ending_points = [j | i in 1..n, j in 2..n+1 where i < j]; % Edges' finishing points.
+
+array[dom_veh, 1..num_nodes] of var bool: visited_nodes; % visited_nodes[i,j] <-> vehicle i visites customer j
+array[dom_veh, 1..num_edges] of var bool: visited_edges; % visited_edges[i,l] <-> vehicle i pass through edge l
+
+constraint forall(i in 1..n, v in dom_veh)(
+  next[i,v] > 0 <-> (visited_nodes[v,i] /\ visited_nodes[v, next[i,v]] /\ visited_edges[v, i * (next[i,v] - 1)])
+);
+
+constraint forall(v in dom_veh)(
+  let {
+    array[1..num_nodes] of var bool: v_nodes = [visited_nodes[v, j] | j in 1..num_nodes];
+    array[1..num_edges] of var bool: v_edges = [visited_edges[v, j] | j in 1..num_edges];
+  } in 
+  forall(i in 1..n+1 where next[i,v] > 0)(
+    path(starting_points, ending_points, i, n+1, v_nodes, v_edges)::domain
+  )
+);
+
+output ["\(starting_points[i]) " | i in 1..num_edges];
+output ["\n"];
+output ["\(ending_points[i]) " | i in 1..num_edges];
+output ["\n"];
+
+
 
 % Solving configuration
 % solve minimize obj_f;
