@@ -22,7 +22,7 @@ array [dom_veh] of int: Capacity; % Capacity of vehicle j, j in dom_veh.
 
 % Variables and variable-related constants
 % > Distances between nodes
-array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
+array [dom_nodes, dom_nodes] of var int: distances; % Distances between locations.
 
 % > Decision variables and sets
 set of int: dom_nodes = 1..n+2*NumVehicles; % Customers indexes lie between 1..n; depot entrances and exits lie between [n+1, n+2*NumVehicles].
@@ -37,7 +37,19 @@ function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
 
 
 % Initialization constraints
-constraint forall(c1, c2 in 1..n+1 where c1 <= c2)(if(c1 < c2) then distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2]) else distances[c1, c2] = 0 endif); % Computes the distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
+constraint forall(c1, c2 in dom_nodes where c1 < c2)(
+  if c1 <= n then
+    if c2 <= n+1 then
+      distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2])
+    else
+      distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[n+1], locY[n+1])
+    endif
+  else
+    if c2 > n+1 then
+      distances[c1, c2] = 0
+    endif
+  endif
+); % Computes the distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
 
 
 % Implied constraints
@@ -70,14 +82,48 @@ constraint next[max(dom_nodes)] == n+1;
 constraint circuit(next)::domain;
 
 constraint forall(i in (1..n union {j | j in n+1..max(dom_nodes) where if (n+1) mod 2 == 0 then j mod 2 == 0 else j mod 2 != 0 endif}))(
-  vehicle[i] = vehicle[next[i]]
+  vehicle[i] = vehicle[next[i]] % il veicolo associato alla visita i deve essere lo stesso della visita successiva tranne quando si visita un end-depot
 );
 
 constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain;
 
-output["\n"];
+constraint forall(v in dom_veh)(
+  sum([Demand[i] | i in 1..n where vehicle[i] == v]) <= Capacity[v]
+);
+
+
+% Objective values
+% > Distance
+0..10: total_distance_weigth = 10;
+var int: total_distance = sum(i in dom_nodes)(
+  if i < next[i] then
+    distances[i,next[i]]
+  else
+    distances[next[i], i]
+  endif  
+); % Total distance travelled by the vehicles.
+
+% > Vehicles
+0..10: used_vehicles_weigth = 0;
+var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of vehicles that leave the depot.
+% > Function to minimize
+var int: obj_f = total_distance_weigth * total_distance + used_vehicles_weigth * used_vehicles;
+
+solve minimize obj_f;
+
 output [show_int(3, i) | i in dom_nodes];
 output ["\n"];
 output [show_int(3, next[i]) | i in dom_nodes];
 output ["\n"];
 output [show_int(3, vehicle[i]) | i in dom_nodes];
+output ["\n"];
+output [
+"Dataset: \(Name)\n",
+"------------------\n",
+"Total number of customers: \(n)\n",
+"Depot coordinates: (\(locX[n+1]), \(locY[n+1]))\n",
+"Total distance travelled by vehicles: \(total_distance)\n",
+"Number of vehicles that were moved: \(used_vehicles)\n"
+];
+%output ["Distances between nodes\n"];
+%output ["\(i) -> \(j) = " ++ "\(distances[i,j])\n" | i,j in dom_nodes where i<j];
