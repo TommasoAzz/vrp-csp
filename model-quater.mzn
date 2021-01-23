@@ -69,6 +69,15 @@ constraint next[max(dom_nodes)] == n+1;
 
 constraint circuit(next)::domain;
 
+constraint forall(i in (1..n union {j | j in n+1..max(dom_nodes) where if (n+1) mod 2 == 0 then j mod 2 == 0 else j mod 2 != 0 endif}))(
+  vehicle[i] = vehicle[next[i]]
+);
+
+constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain;
+
+output["\n"];
 output [show_int(3, i) | i in dom_nodes];
 output ["\n"];
 output [show_int(3, next[i]) | i in dom_nodes];
+output ["\n"];
+output [show_int(3, vehicle[i]) | i in dom_nodes];
