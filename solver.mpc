@@ -1,6 +1,6 @@
 {
-    "--solver-statistics": true,
-    "intermediate-solutions": false,
+    "intermediate-solutions": true,
     "solver": "org.gecode.gecode@6.3.0",
+    "solver-statistics": true,
     "time-limit": 300000
 }

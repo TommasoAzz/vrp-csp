@@ -1,12 +1,12 @@
 {
     "openFiles": [
         "model.mzn",
-        "model-bis.mzn",
         "model-tris.mzn",
         "instances/example.dzn",
-        "instances/mini-example.dzn"
+        "instances/mini-example.dzn",
+        "model-quater.mzn"
     ],
-    "openTab": 2,
+    "openTab": 4,
     "projectFiles": [
         "instances/example.dzn",
         "instances/mini-example.dzn",
@@ -22,6 +22,7 @@
         "instances/pr10.dzn",
         "instances/pr11.dzn",
         "model-bis.mzn",
+        "model-quater.mzn",
         "model-tris.mzn",
         "model.mzn",
         "solver.mpc"
