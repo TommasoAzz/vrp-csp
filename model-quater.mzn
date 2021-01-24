@@ -60,19 +60,11 @@ constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the 
 constraint alldifferent(next)::domain; % All nodes must be different, note that depot has multiple values
 
 constraint forall(i in n+1..max(dom_nodes)-1)(
-  if(n mod 2 == 0) then % se il numero di customer è pari allora le partenze dei veicoli avvengono da depot di index dispari e gli arrivi da depot di index pari
-    if(i mod 2 == 0) then
-      next[i] = i+1
+    if((n mod 2 == 0 /\ i mod 2 == 0) \/ (n mod 2 != 0 /\ i mod 2 != 0)) then
+        next[i] = i+1
     else
-      next[i] = i+1 \/ (1 <= next[i] /\ next[i] <= n)
+        next[i] = i+1 \/ (1 <= next[i] /\ next[i] <= n)
     endif
-  else
-    if(i mod 2 != 0) then
-      next[i] = i+1
-    else
-      next[i] = i+1 \/ (1 <= next[i] /\ next[i] <= n)
-    endif
-  endif
 );
 
 constraint forall(i in dom_nodes)(next[i] != i);
