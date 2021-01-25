@@ -89,18 +89,10 @@ constraint forall(v in dom_veh)(
   strictly_increasing([next[i] | i in 1..n where vehicle[i] = v])::domain
 );
 */
-/*
-constraint forall(v in dom_veh)(
-  let {
-    array [1..n] of var 0..n: prova = [if vehicle[i] = v then i else 0 endif| i in 1..n]
-  } in 
-    lex_lesseq(prova, reverse(prova))
-);
-*/
 
-array [dom_veh, 1..n] of var 0..max(dom_nodes): routes;
+array [dom_veh, 1..n] of var 0..n: routes;
 
-array [dom_veh] of var 0..max(dom_nodes): first_visit;
+array [dom_veh] of var 0..n: first_visit;
 
 constraint forall(v in dom_veh)(
   first_visit[v] = next[n+(2*v)-1] <-> (vehicle[n+(2*v)-1] = v /\ next[n+(2*v)-1] <= n)
@@ -111,10 +103,30 @@ constraint forall(v in dom_veh)(
       if(i == 1) then
         routes[v, i] = first_visit[v]
       else
-        routes[v, i] = next[routes[v, i-1]] <-> (vehicle[routes[v, i-1]] = v /\ next[routes[v, i-1]] <= n)
+        if (vehicle[routes[v, i-1]] = v /\ next[routes[v, i-1]] <= n) then
+          routes[v, i] = next[routes[v, i-1]]
+        else
+          routes[v, i] = 0
+        endif
       endif
   )
 );
+
+predicate lex_lesseq_except_0(array[1..n] of var 0..n: x, array[1..n] of var 0..n: y) =
+  let {
+    var int: el = n - count(x, 0);
+    var int: zeros = count(x, 0);
+  }
+  in
+  forall(j in 1..el)(
+    forall(i in 1..j-1)(x[i] = y[i+zeros]) -> x[j] <= y[j+zeros]
+  );
+
+/*
+constraint forall(v in dom_veh)(
+  lex_lesseq_except_0([routes[v, i] | i in 1..n], reverse([routes[v, i] | i in 1..n]))
+);
+*/
 
 % Objective values
 % > Distance
@@ -150,6 +162,7 @@ output [show_int(3, next[i]) | i in dom_nodes];
 output ["\nVehicles\n"];
 output [show_int(3, vehicle[i]) | i in dom_nodes];
 output ["\nRoutes\n"];
+
 output [
   if (i mod n == 0) then 
     show_int(3, routes[v, i]) ++ "\n"
