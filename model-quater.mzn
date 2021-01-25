@@ -98,6 +98,24 @@ constraint forall(v in dom_veh)(
 );
 */
 
+array [dom_veh, 1..n] of var 0..max(dom_nodes): routes;
+
+array [dom_veh] of var 0..max(dom_nodes): first_visit;
+
+constraint forall(v in dom_veh)(
+  first_visit[v] = next[n+(2*v)-1] <-> (vehicle[n+(2*v)-1] = v /\ next[n+(2*v)-1] <= n)
+);
+
+constraint forall(v in dom_veh)(
+  forall(i in 1..n)(
+      if(i == 1) then
+        routes[v, i] = first_visit[v]
+      else
+        routes[v, i] = next[routes[v, i-1]] <-> (vehicle[routes[v, i-1]] = v /\ next[routes[v, i-1]] <= n)
+      endif
+  )
+);
+
 % Objective values
 % > Distance
 0..10: total_distance_weigth = 10;
@@ -125,13 +143,20 @@ output [
 "Total distance travelled by vehicles: \(total_distance)\n",
 "Number of vehicles that were moved: \(used_vehicles)\n"
 ];
-
+output ["Indexes\n"];
 output [show_int(3, i) | i in dom_nodes];
-output ["\n"];
+output ["\nNodes\n"];
 output [show_int(3, next[i]) | i in dom_nodes];
-output ["\n"];
+output ["\nVehicles\n"];
 output [show_int(3, vehicle[i]) | i in dom_nodes];
-output ["\n"];
+output ["\nRoutes\n"];
+output [
+  if (i mod n == 0) then 
+    show_int(3, routes[v, i]) ++ "\n"
+  else
+    show_int(3, routes[v, i]) ++ " "
+  endif | v in dom_veh, i in 1..n
+];
 
 %output ["Distances between nodes\n"];
 %output ["\(i) -> \(j) = " ++ "\(distances[i,j])\n" | i,j in dom_nodes where i<j];
