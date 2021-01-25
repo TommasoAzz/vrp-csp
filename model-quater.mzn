@@ -54,11 +54,11 @@ constraint forall(c1, c2 in dom_nodes where c1 < c2)(
 
 % Implied constraints
 constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the customers' demands must be lesser or equal than the available capacity of the vehicles otherwise the problem is unsatisfiable.
-
-
-% Problem constraints
 constraint alldifferent(next)::domain; % All nodes must be different, note that depot has multiple values
 
+constraint forall(i in dom_nodes)(next[i] != i);
+
+% Problem constraints
 constraint forall(i in n+1..max(dom_nodes)-1)(
     if((n mod 2 == 0 /\ i mod 2 == 0) \/ (n mod 2 != 0 /\ i mod 2 != 0)) then
         next[i] = i+1
@@ -66,8 +66,6 @@ constraint forall(i in n+1..max(dom_nodes)-1)(
         next[i] = i+1 \/ (1 <= next[i] /\ next[i] <= n)
     endif
 );
-
-constraint forall(i in dom_nodes)(next[i] != i);
 
 constraint next[max(dom_nodes)] == n+1;
 
@@ -83,6 +81,22 @@ constraint forall(v in dom_veh)(
   sum([Demand[i] | i in 1..n where vehicle[i] == v]) <= Capacity[v]
 );
 
+% Symmetry breaking 
+constraint increasing([vehicle[i] | i in n+1..max(dom_nodes)])::domain;
+
+/* Doesn't work -> it eliminates some possible good solutiona 
+constraint forall(v in dom_veh)(
+  strictly_increasing([next[i] | i in 1..n where vehicle[i] = v])::domain
+);
+*/
+/*
+constraint forall(v in dom_veh)(
+  let {
+    array [1..n] of var 0..n: prova = [if vehicle[i] = v then i else 0 endif| i in 1..n]
+  } in 
+    lex_lesseq(prova, reverse(prova))
+);
+*/
 
 % Objective values
 % > Distance
@@ -103,12 +117,6 @@ var int: obj_f = total_distance_weigth * total_distance + used_vehicles_weigth *
 
 solve minimize obj_f;
 
-output [show_int(3, i) | i in dom_nodes];
-output ["\n"];
-output [show_int(3, next[i]) | i in dom_nodes];
-output ["\n"];
-output [show_int(3, vehicle[i]) | i in dom_nodes];
-output ["\n"];
 output [
 "Dataset: \(Name)\n",
 "------------------\n",
@@ -117,5 +125,13 @@ output [
 "Total distance travelled by vehicles: \(total_distance)\n",
 "Number of vehicles that were moved: \(used_vehicles)\n"
 ];
+
+output [show_int(3, i) | i in dom_nodes];
+output ["\n"];
+output [show_int(3, next[i]) | i in dom_nodes];
+output ["\n"];
+output [show_int(3, vehicle[i]) | i in dom_nodes];
+output ["\n"];
+
 %output ["Distances between nodes\n"];
 %output ["\(i) -> \(j) = " ++ "\(distances[i,j])\n" | i,j in dom_nodes where i<j];
