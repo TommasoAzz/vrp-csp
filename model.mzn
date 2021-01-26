@@ -1,9 +1,8 @@
 % Vehicle Routing Problem in CSP
 % Marco Ferrati, Tommaso Azzalin
 
-include "alldifferent_except_0.mzn";
-include "path.mzn";
-include "among.mzn";
+include "alldifferent_except.mzn";
+include "globals.mzn";
 
 % Parameters
 % > Dataset name
@@ -20,62 +19,131 @@ int: NumVehicles; % Total number of available vehicles.
 set of int: dom_veh = 1..NumVehicles; % Domain of vehicles.
 array [dom_veh] of int: Capacity; % Capacity of vehicle j, j in dom_veh.
 
+
 % Variables and variable-related constants
-int: num_nodes = n+2; % There are n customers and one depot. The depot is split into the depot starting point (n+1) and the depot finishing point (n+2).
-int: num_edges = round(((num_nodes * (num_nodes - 1)) / 2)); % Total numbers of possible edges in a complete graph.
-% (REMOVED: The "-1" removes the edge (n+1,n+2) between the depot starting and finishing points, since it is the same node.)
+% > Distances between nodes
+array [dom_nodes, dom_nodes] of var int: distances; % Distances between locations.
 
-array[int] of int: starting_points = [i | i in 1..n+1, j in 1..n+1 where i <= j]; % Edges' starting points.
-array[int] of int: ending_points = [j | i in 1..n+1, j in 2..n+2 where i < j]; % Edges' finishing points.
+% > Decision variables and sets
+set of int: dom_nodes = 1..n+2*NumVehicles; % Customers indexes lie between 1..n; depot entrances and exits lie between [n+1, n+2*NumVehicles].
+array [dom_nodes] of var dom_nodes: next; % For all i in dom_nodes (visit indexes), next[i] corresponds to the node that is visited after node i, that is next[i].
+% Note that the depot assumes multiple values.
+array [dom_nodes] of var dom_veh: vehicle; % For all i in dom_nodes (visit indexes), vehicle[i] corresponds to the vehicle that performs the i-th visit to node visit[i].
 
-array[dom_veh, 1..num_nodes] of var bool: visited_nodes; % visited_nodes[i,j] <-> vehicle i visites customer j
-array[dom_veh, 1..num_edges] of var bool: visited_edges; % visited_edges[i,l] <-> vehicle i pass through edge l
-
-array [1..n+1, 1..n+1] of var int: distances; % Distances between locations.
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
   round(sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2)) * 1000); % Calculates Euclidean distance between two points (x1,y1) and (x2,y2).
 
+
 % Initialization constraints
-constraint forall(c1, c2 in 1..n+1 where c1 <= c2)(if(c1 < c2) then distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2]) else distances[c1, c2] = 0 endif); % Computes the distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
+constraint forall(c1, c2 in dom_nodes where c1 < c2)(
+  if c1 <= n then
+    if c2 <= n+1 then
+      distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[c2], locY[c2])
+    else
+      distances[c1, c2] = calculate_distance(locX[c1], locY[c1], locX[n+1], locY[n+1])
+    endif
+  else
+    if c2 > n+1 then
+      distances[c1, c2] = 0
+    endif
+  endif
+); % Computes the distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
+
 
 % Implied constraints
 constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the customers' demands must be lesser or equal than the available capacity of the vehicles otherwise the problem is unsatisfiable.
+constraint alldifferent(next)::domain; % All nodes must be different, note that depot has multiple values
+
+constraint forall(i in dom_nodes)(next[i] != i);
 
 % Problem constraints
-constraint among(n, [visited_nodes[v, node] | v in dom_veh, node in 1..n], {true})::domain; % Exactly n visits must be done in total, one per node (part 1).
+constraint forall(i in n+1..max(dom_nodes)-1)(
+    if((n mod 2 == 0 /\ i mod 2 == 0) \/ (n mod 2 != 0 /\ i mod 2 != 0)) then
+        next[i] = i+1
+    else
+        next[i] = i+1 \/ (1 <= next[i] /\ next[i] <= n)
+    endif
+);
 
-constraint forall(customer in 1..n)(alldifferent_except_0([visited_nodes[v, customer] | v in dom_veh])::domain); % Exactly n visits must be done in total, one per node (part 2).
+constraint next[max(dom_nodes)] == n+1;
 
-constraint forall(v in dom_veh) (
-  path(num_nodes, num_edges, starting_points, ending_points, n+1, n+2, [visited_nodes[v, i] | i in 1..num_nodes], [visited_edges[v, i] | i in 1..num_edges])::domain
-); % Finds a path for each vehicle v starting from n+1 (depot starting point) and ending into n+2 (depot ending point).
+constraint circuit(next)::domain;
 
-constraint forall(v in dom_veh) (
-  sum(node in 1..n where visited_nodes[v, node])(Demand[node]) <= Capacity[v]
-); % Ensures that capacity of a vehicle v is not exceeded in its path.
+constraint forall(i in (1..n union {j | j in n+1..max(dom_nodes) where if (n+1) mod 2 == 0 then j mod 2 == 0 else j mod 2 != 0 endif}))(
+  vehicle[i] = vehicle[next[i]] % il veicolo associato alla visita i deve essere lo stesso della visita successiva tranne quando si visita un end-depot
+);
 
+constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain;
+
+constraint forall(v in dom_veh)(
+  sum([Demand[i] | i in 1..n where vehicle[i] == v]) <= Capacity[v]
+);
+
+% Symmetry breaking 
+constraint increasing([vehicle[i] | i in n+1..max(dom_nodes)])::domain;
+
+/* Doesn't work -> it eliminates some possible good solutiona 
+constraint forall(v in dom_veh)(
+  strictly_increasing([next[i] | i in 1..n where vehicle[i] = v])::domain
+);
+*/
+/*
+array [dom_veh, 1..n] of var 0..n: routes;
+
+array [dom_veh] of var 0..n: first_visit;
+
+constraint forall(v in dom_veh)(
+  first_visit[v] = next[n+(2*v)-1] <-> (vehicle[n+(2*v)-1] = v /\ next[n+(2*v)-1] <= n)
+);
+
+constraint forall(v in dom_veh)(
+  forall(i in 1..n)(
+      if(i == 1) then
+        routes[v, i] = first_visit[v]
+      else
+        if (vehicle[routes[v, i-1]] = v /\ next[routes[v, i-1]] <= n) then
+          routes[v, i] = next[routes[v, i-1]]
+        else
+          routes[v, i] = 0
+        endif
+      endif
+  )
+);
+*/
+array[1..n, 1..n] of var bool: r;
+constraint forall(i, j in 1..n)(
+  r[i,j] = true <-> next[i] = j
+);
+
+constraint lex_lesseq(array1d(r), [r[j, i] | i, j in 1..n]);
 
 % Objective values
 % > Distance
 0..10: total_distance_weigth = 10;
-var int: total_distance = sum(v in dom_veh, e in 1..num_edges where visited_edges[v, e])(
-  distances[
-    if starting_points[e] == n+2 then n+1 else starting_points[e] endif,
-    if ending_points[e] == n+2 then n+1 else ending_points[e] endif
-  ]
-);
+var int: total_distance = sum(i in dom_nodes)(
+  if i < next[i] then
+    distances[i,next[i]]
+  else
+    distances[next[i], i]
+  endif  
+); % Total distance travelled by the vehicles.
+
 % > Vehicles
 0..10: used_vehicles_weigth = 0;
-var int: used_vehicles = sum(v in dom_veh)(exists([visited_nodes[v, node] | node in 1..n]));
+var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of vehicles that leave the depot.
+% > Function to minimize
+var int: obj_f = total_distance_weigth * total_distance + used_vehicles_weigth * used_vehicles;
 
-constraint assert(total_distance_weigth + used_vehicles_weigth <= 10, "Weights must sum to 10");
+solve minimize obj_f;
 
-solve minimize (total_distance_weigth * total_distance) + (used_vehicles_weigth * used_vehicles);
+output[show(next)++"\n"];
+output[show(vehicle)++"\n"];
+output["\(used_vehicles)\n"];
+output["\(total_distance)"];
 
-% Output
-% > Input data and output of the problem (objective function)
+/*
 output [
 "Dataset: \(Name)\n",
 "------------------\n",
@@ -84,19 +152,22 @@ output [
 "Total distance travelled by vehicles: \(total_distance)\n",
 "Number of vehicles that were moved: \(used_vehicles)\n"
 ];
+output ["Indexes\n"];
+output [show_int(3, i) | i in dom_nodes];
+output ["\nNodes\n"];
+output [show_int(3, next[i]) | i in dom_nodes];
+output ["\nVehicles\n"];
+output [show_int(3, vehicle[i]) | i in dom_nodes];
+/*
+output ["\nRoutes\n"];
 
-output ["\n"];
-
-output ["Distances between nodes\n"];
-output ["\(i) -> \(j) = " ++ "\(distances[i,j])\n" | i,j in 1..n+1 where i<j];
-
-output ["\n"];
-
-output[
-"Vehicle " ++ show_int(3, v) ++ " with capacity: " ++ show_int(3, Capacity[v]) ++ "\n" ++ 
-"------------------------------\n" ++
-"- served customers: " ++ show([k | k in 1..n where visited_nodes[v, k]]) ++ "\n" ++ 
-"- passed through:\n\t- " ++ 
-show(["\(starting_points[k]) -> \(ending_points[k])" | k in 1..num_edges where visited_edges[v, k]]) ++
-"\n\n" | v in dom_veh
-]
+output [
+  if (i mod n == 0) then 
+    show_int(3, routes[v, i]) ++ "\n"
+  else
+    show_int(3, routes[v, i]) ++ " "
+  endif | v in dom_veh, i in 1..n
+];
+*/
+%output ["Distances between nodes\n"];
+%output ["\(i) -> \(j) = " ++ "\(distances[i,j])\n" | i,j in dom_nodes where i<j];
