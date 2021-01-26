@@ -89,7 +89,7 @@ constraint forall(v in dom_veh)(
   strictly_increasing([next[i] | i in 1..n where vehicle[i] = v])::domain
 );
 */
-
+/*
 array [dom_veh, 1..n] of var 0..n: routes;
 
 array [dom_veh] of var 0..n: first_visit;
@@ -111,22 +111,13 @@ constraint forall(v in dom_veh)(
       endif
   )
 );
-
-predicate lex_lesseq_except_0(array[1..n] of var 0..n: x, array[1..n] of var 0..n: y) =
-  let {
-    var int: el = n - count(x, 0);
-    var int: zeros = count(x, 0);
-  }
-  in
-  forall(j in 1..el)(
-    forall(i in 1..j-1)(x[i] = y[i+zeros]) -> x[j] <= y[j+zeros]
-  );
-
-/*
-constraint forall(v in dom_veh)(
-  lex_lesseq_except_0([routes[v, i] | i in 1..n], reverse([routes[v, i] | i in 1..n]))
-);
 */
+array[1..n, 1..n] of var bool: r;
+constraint forall(i, j in 1..n)(
+  r[i,j] = true <-> next[i] = j
+);
+
+constraint lex_lesseq(array1d(r), [r[j, i] | i, j in 1..n]);
 
 % Objective values
 % > Distance
@@ -161,6 +152,7 @@ output ["\nNodes\n"];
 output [show_int(3, next[i]) | i in dom_nodes];
 output ["\nVehicles\n"];
 output [show_int(3, vehicle[i]) | i in dom_nodes];
+/*
 output ["\nRoutes\n"];
 
 output [
@@ -170,6 +162,6 @@ output [
     show_int(3, routes[v, i]) ++ " "
   endif | v in dom_veh, i in 1..n
 ];
-
+*/
 %output ["Distances between nodes\n"];
 %output ["\(i) -> \(j) = " ++ "\(distances[i,j])\n" | i,j in dom_nodes where i<j];
