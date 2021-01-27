@@ -59,6 +59,7 @@ for search_strategy in search_strategies:
                 print("next: ", variables[0])
                 print("vehicle: ", variables[1])
                 print("used_vehicles: ", variables[2])
-                print("total_distance: ", variables[3], "\n")
+                print("total_distance: ", variables[3])
+                print("obj_f: ", variables[4], "\n")
             else:
                 print("No solutions were found (", result.status, ")\n")
