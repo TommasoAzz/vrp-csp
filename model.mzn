@@ -190,4 +190,5 @@ output [
 output[show(next)++"\n"];
 output[show(vehicle)++"\n"];
 output["\(used_vehicles)\n"];
-output["\(total_distance)"];
+output["\(total_distance)\n"];
+output["\(obj_f)"];
