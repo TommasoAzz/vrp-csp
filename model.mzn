@@ -151,7 +151,7 @@ var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of veh
 var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight * used_vehicles;
 
 % Solving settings and heuristics
-solve minimize obj_f;
+%solve minimize obj_f;
 
 /*
 % COMMENTED BLOCK 3
@@ -191,4 +191,3 @@ output[show(next)++"\n"];
 output[show(vehicle)++"\n"];
 output["\(used_vehicles)\n"];
 output["\(total_distance)"];
-
