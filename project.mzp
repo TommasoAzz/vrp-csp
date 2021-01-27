@@ -1,12 +1,10 @@
 {
     "openFiles": [
         "model.mzn",
-        "model-tris.mzn",
         "instances/example.dzn",
-        "instances/mini-example.dzn",
-        "model-quater.mzn"
+        "instances/mini-example.dzn"
     ],
-    "openTab": 4,
+    "openTab": 3,
     "projectFiles": [
         "instances/example.dzn",
         "instances/mini-example.dzn",
@@ -21,11 +19,8 @@
         "instances/pr09.dzn",
         "instances/pr10.dzn",
         "instances/pr11.dzn",
-        "model-bis.mzn",
-        "model-quater.mzn",
-        "model-tris.mzn",
-        "model.mzn",
-        "solver.mpc"
+        "solver.mpc",
+        "model.mzn"
     ],
     "selectedSolverConfigFile": "solver.mpc",
     "version": 106

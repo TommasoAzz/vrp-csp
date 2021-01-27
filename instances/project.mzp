@@ -1,0 +1,38 @@
+{
+    "openFiles": [
+        "../model.mzn",
+        "example.dzn",
+        "mini-example.dzn",
+        "pr01.dzn",
+        "pr02.dzn",
+        "pr03.dzn",
+        "pr04.dzn",
+        "pr05.dzn",
+        "pr06.dzn",
+        "pr07.dzn",
+        "pr08.dzn",
+        "pr09.dzn",
+        "pr10.dzn",
+        "pr11.dzn"
+    ],
+    "openTab": 2,
+    "projectFiles": [
+        "example.dzn",
+        "mini-example.dzn",
+        "pr01.dzn",
+        "pr02.dzn",
+        "pr03.dzn",
+        "pr04.dzn",
+        "pr05.dzn",
+        "pr06.dzn",
+        "pr07.dzn",
+        "pr08.dzn",
+        "pr09.dzn",
+        "pr10.dzn",
+        "pr11.dzn",
+        "solver.mpc",
+        "../model.mzn"
+    ],
+    "selectedSolverConfigFile": "solver.mpc",
+    "version": 106
+}
