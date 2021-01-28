@@ -37,6 +37,8 @@ array [dom_nodes] of var dom_veh: vehicle; % vehicle[i] = v <-> vehicle v visits
 
 array[1..n, 1..n] of var bool: visited_edges;
 
+array[dom_veh, 1..n] of var bool: visited_customers;
+
 % > Ordered routes
 /*
 % COMMENTED BLOCK 1
@@ -137,6 +139,16 @@ constraint forall(i, j in 1..n)(visited_edges[i,j] <-> next[i] = j); % Channelin
 
 constraint lex_lesseq(array1d(visited_edges), [visited_edges[j, i] | i, j in 1..n]); % Leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order is the same, therefore one of the two routes is discarded.
 
+constraint forall(v in dom_veh, i in 1..n)(
+  visited_customers[v, i] = true <-> vehicle[i] = v
+);
+
+constraint forall(v_i in dom_veh)(
+  forall(v_j in dom_veh where (Capacity[v_i] = Capacity[v_j] /\ v_i < v_j))(
+    lex_lesseq([visited_customers[v_i, i] | i in 1..n], [visited_customers[v_j, i] | i in 1..n])
+  )
+);
+
 % Objective values
 var int: total_distance = sum(i in dom_nodes)(
   % The matrix distances is upper triangular.
@@ -151,7 +163,7 @@ var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of veh
 var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight * used_vehicles;
 
 % Solving settings and heuristics
-%solve minimize obj_f;
+solve minimize obj_f;
 
 /*
 % COMMENTED BLOCK 3
