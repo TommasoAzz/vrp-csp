@@ -143,9 +143,13 @@ constraint forall(v in dom_veh, i in 1..n)(
   visited_customers[v, i] = true <-> vehicle[i] = v
 );
 
-constraint forall(v_i in dom_veh)(
-  forall(v_j in dom_veh where (Capacity[v_i] = Capacity[v_j] /\ v_i < v_j))(
-    lex_lesseq([visited_customers[v_i, i] | i in 1..n], [visited_customers[v_j, i] | i in 1..n])
+constraint forall(c in array2set(Capacity))(
+  let {
+    array[int] of dom_veh: vehicles_with_same_capacity = [v | v in dom_veh where Capacity[v] = c]
+  }
+  in
+  forall(v in 1..length(vehicles_with_same_capacity)-1)(
+    lex_lesseq([visited_customers[v, i] | i in 1..n], [visited_customers[v+1, i] | i in 1..n])
   )
 );
 
