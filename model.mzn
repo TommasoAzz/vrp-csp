@@ -139,19 +139,15 @@ constraint forall(i, j in 1..n)(visited_edges[i,j] <-> next[i] = j); % Channelin
 
 constraint lex_lesseq(array1d(visited_edges), [visited_edges[j, i] | i, j in 1..n]); % Leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order is the same, therefore one of the two routes is discarded.
 
-constraint forall(v in dom_veh, i in 1..n)(
-  visited_customers[v, i] = true <-> vehicle[i] = v
-);
+constraint forall(v in dom_veh, i in 1..n)(visited_customers[v, i] <-> vehicle[i] = v); % Channeling between vehicle and visited_customers.
 
 constraint forall(c in array2set(Capacity))(
   let {
     array[int] of dom_veh: vehicles_with_same_capacity = [v | v in dom_veh where Capacity[v] = c]
-  }
-  in
-  forall(v in 1..length(vehicles_with_same_capacity)-1)(
+  } in forall(v in 1..length(vehicles_with_same_capacity)-1)(
     lex_lesseq([visited_customers[v, i] | i in 1..n], [visited_customers[v+1, i] | i in 1..n])
   )
-);
+); % Since vehicle can have the same capacity and therefore serve the same nodes, a lex_lesseq is posted to avoid this possibility.
 
 % Objective values
 var int: total_distance = sum(i in dom_nodes)(
