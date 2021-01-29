@@ -1,0 +1,31 @@
+\documentclass[../main.tex]{subfiles}
+\begin{document}
+
+\subsection{Formal problem definition}
+After explaining what the VRP is, let's go further in detail to understand how the problem can be modelled.\\
+The input of the problem is:
+\begin{itemize}
+    \item a set of vehicles, of size $m$, in which all of them:
+    \begin{itemize}
+        \item must either start and leave from the depot (if they need to move to deliver goods) or stay in it;
+        \item have a capacity of goods that can be given out to satisfy customers' demands;
+    \end{itemize}
+    \item a set of customers, of size $n$, in which each of them has:
+    \begin{itemize}
+        \item a demand quantity of the goods that is delivered by the vehicles;
+        \item a location;
+    \end{itemize}
+    \item a depot, which is a place from which all vehicles begin and end their routes.
+\end{itemize}
+The output of the problem is:
+\begin{itemize}
+    \item the vehicle serving each customer;
+    \item the route (i.e. all customers visited, in which order) travelled by each vehicle.
+\end{itemize}
+The goal is:
+\begin{itemize}
+    \item minimizing the total distance travelled by the vehicles, or;
+    \item minimizing the total distance and the number of vehicles (achievable by giving weights to this two aspects).
+\end{itemize}
+
+\end{document}
