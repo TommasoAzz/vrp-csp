@@ -3,6 +3,7 @@
 % Marco Ferrati, Tommaso Azzalin
 
 include "globals.mzn";
+include "gecode.mzn";
 
 % Parameters
 % > Dataset name
@@ -130,7 +131,15 @@ var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of veh
 var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight * used_vehicles;
 
 % Solving settings and heuristics
-solve minimize obj_f;
+% solve minimize obj_f;
+% solve ::int_search(next, dom_w_deg, indomain_random) minimize obj_f;
+% solve ::int_search(next, smallest, indomain_random) minimize obj_f;
+% solve ::int_search(next, first_fail, indomain_min) minimize obj_f;
+% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) minimize obj_f;
+% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
+% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 15) minimize obj_f;
+% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 75) minimize obj_f;
+% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 25) minimize obj_f;
 
 /*
 % FANCY OUTPUT FOR MINIZINC IDE AND CLI

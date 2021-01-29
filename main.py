@@ -6,6 +6,14 @@ import minizinc
 from datetime import timedelta
 from sys import argv
 
+file = open('output.txt', mode="w+")
+def print_both(*lines):
+    global file
+    for l in lines:
+        print(l, end="")
+        file.write(str(l))
+    print("\n")
+
 # Time limits for running the problem and getting more interesting statistics.
 if '-t' in argv:
     time_limits = [int(argv[argv.index('-t') + 1])]
@@ -22,21 +30,18 @@ else:
 search_strategies = [
     "",
     "::int_search(next, dom_w_deg, indomain_random)",
-    "::int_search(next, dom_w_deg, indomain_median)",
-    "::int_search(next, dom_w_deg, indomain_min)",
-    "::int_search(next, dom_w_deg, indomain_max)",
-    "::int_search(next, dom_w_deg, indomain_split)",
+    "::int_search(next, smallest, indomain_random)",
+    "::int_search(next, first_fail, indomain_min)",
     "::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250)",
-    "::int_search(next, dom_w_deg, indomain_median) ::restart_luby(250)",
-    "::int_search(next, dom_w_deg, indomain_min) ::restart_luby(250)",
-    "::int_search(next, dom_w_deg, indomain_max) ::restart_luby(250)",
-    "::int_search(next, dom_w_deg, indomain_split) ::restart_luby(250)",
+    "::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85)",
+    "::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 15)",
+    "::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 75)",
+    "::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 25)",
 ]
 if '-s' in argv:
     search_strategies = [search_strategies[int(argv[argv.index('-s') + 1])]]
 
-file = open('output.txt', mode="w+")
-print("----------\nVRP Script\n----------\n")
+print_both("----------\nVRP Script\n----------\n")
 
 # MiniZinc parameters
 gecode = minizinc.Solver.lookup("gecode")
@@ -44,33 +49,33 @@ gecode = minizinc.Solver.lookup("gecode")
 for search_strategy in search_strategies:
     model = minizinc.Model("./model.mzn")
     model.add_string("solve {} minimize obj_f;".format(search_strategy))
-    print("-------------------------------------------")
-    print("Search strategy: ", search_strategy)
-    print("-------------------------------------------\n")
+    print_both("-------------------------------------------")
+    print_both("Search strategy: ", search_strategy if search_strategy != "" else "default")
+    print_both("-------------------------------------------\n")
     for time_limit in time_limits:
-        print("-------------------------------------------")
-        print("Time limit for executing set to {} seconds".format(time_limit))
-        print("-------------------------------------------\n")
+        print_both("-------------------------------------------")
+        print_both("Time limit for executing set to {} seconds".format(time_limit))
+        print_both("-------------------------------------------\n")
         for dataset in datasets:
             instance = minizinc.Instance(gecode, model)
             instance.add_file("./instances/{}.dzn".format(dataset))
 
             result = instance.solve(timeout=timedelta(seconds=time_limit))
-            print("Instance: ", dataset)
-            print("---------------------------")
+            print_both("Instance: ", dataset)
+            print_both("---------------------------")
             keys = result.statistics.keys()
-            print("Solve time: ", result.statistics['time'].total_seconds() if 'time' in keys else "Not available.")
-            print("Failures: ", result.statistics['failures'] if 'failures' in keys else "Not available.")
-            print("Restarts: ", result.statistics['restarts'] if 'restarts' in keys else "Not available.")
-            print("---------------------------")
+            print_both("Solve time: ", result.statistics['time'].total_seconds() if 'time' in keys else "Not available.")
+            print_both("Failures: ", result.statistics['failures'] if 'failures' in keys else "Not available.")
+            print_both("Restarts: ", result.statistics['restarts'] if 'restarts' in keys else "Not available.")
+            print_both("---------------------------")
             if result.status.has_solution():
                 variables = str(result.solution).split("\n")
-                print("next: ", variables[0])
-                print("vehicle: ", variables[1])
-                print("used_vehicles: ", variables[2])
-                print("total_distance: ", variables[3])
-                print("obj_f: ", variables[4], "\n")
+                print_both("next: ", variables[0])
+                print_both("vehicle: ", variables[1])
+                print_both("used_vehicles: ", variables[2])
+                print_both("total_distance: ", variables[3])
+                print_both("obj_f: ", variables[4], "\n")
             else:
-                print("No solutions were found (", result.status, ")\n")
+                print_both("No solutions were found (", result.status, ")\n")
 
 file.close()
