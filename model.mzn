@@ -2,7 +2,6 @@
 % ------------------------------
 % Marco Ferrati, Tommaso Azzalin
 
-include "alldifferent_except.mzn";
 include "globals.mzn";
 
 % Parameters
@@ -158,40 +157,3 @@ output[show(vehicle)++"\n"];
 output["\(used_vehicles)\n"];
 output["\(total_distance)\n"];
 output["\(obj_f)"];
-
-/*
-% ORDERED ROUTES
-% Decomment this block to enable the computation of the ordered route in MiniZinc (it is not needed in the solving of the model).
-% It helps showing the ordered route here in MiniZinc where recursion and a while statement does not exist.
-% Note: this slows down a lot the computation of the solution, since is yet another quadratic constraint.
-array [dom_veh] of var 0..n: first_visit; % first_visit[v] = c <-> vehicle v visits customer c after leaving the depot. If it does not leave the depot, then c = 0.
-array [dom_veh, 1..n] of var 0..n: routes; % routes[v, i] = c <-> vehicle v visits customer c as the i-th customer in its route. If c = 0 then v is not moving or it is coming back to the depot.
-
-constraint forall(v in dom_veh)(
-  first_visit[v] = next[n+(2*v)-1] <-> (vehicle[n+(2*v)-1] = v /\ next[n+(2*v)-1] <= n)
-);
-
-constraint forall(v in dom_veh)(
-  forall(i in 1..n)(
-    if(i == 1) then
-      routes[v, i] = first_visit[v]
-    else
-      if (vehicle[routes[v, i-1]] = v /\ next[routes[v, i-1]] <= n) then
-        routes[v, i] = next[routes[v, i-1]]
-      else
-        routes[v, i] = 0
-      endif
-    endif
-  )
-);
-
-output ["\nRoutes\n"];
-output ["Vehicle 1's route: "];
-output [
-  if (i mod n == 0) then 
-    show_int(3, routes[v, i]) ++ if(i == n /\ v < NumVehicles) then "\nVehicle \(v+1)'s route: " else "" endif
-  else
-    show_int(3, routes[v, i]) ++ " "
-  endif | v in dom_veh, i in 1..n
-];
-*/
