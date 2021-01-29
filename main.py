@@ -21,12 +21,21 @@ else:
 # Search strategies
 search_strategies = [
     "",
-    "::int_search(next, dom_w_deg, indomain_random) :: restart_luby(10)"
+    "::int_search(next, dom_w_deg, indomain_random)",
+    "::int_search(next, dom_w_deg, indomain_median)",
+    "::int_search(next, dom_w_deg, indomain_min)",
+    "::int_search(next, dom_w_deg, indomain_max)",
+    "::int_search(next, dom_w_deg, indomain_split)",
+    "::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250)",
+    "::int_search(next, dom_w_deg, indomain_median) ::restart_luby(250)",
+    "::int_search(next, dom_w_deg, indomain_min) ::restart_luby(250)",
+    "::int_search(next, dom_w_deg, indomain_max) ::restart_luby(250)",
+    "::int_search(next, dom_w_deg, indomain_split) ::restart_luby(250)",
 ]
 if '-s' in argv:
     search_strategies = [search_strategies[int(argv[argv.index('-s') + 1])]]
 
-
+file = open('output.txt', mode="w+")
 print("----------\nVRP Script\n----------\n")
 
 # MiniZinc parameters
@@ -63,3 +72,5 @@ for search_strategy in search_strategies:
                 print("obj_f: ", variables[4], "\n")
             else:
                 print("No solutions were found (", result.status, ")\n")
+
+file.close()
