@@ -39,16 +39,6 @@ array[1..n, 1..n] of var bool: visited_edges;
 
 array[dom_veh, 1..n] of var bool: visited_customers;
 
-% > Ordered routes
-/*
-% COMMENTED BLOCK 1
-% Decomment this block and COMMENTED BLOCK 2 to enable the computation of the ordered route in MiniZinc (it is not needed in the solving of the model).
-% It helps showing the ordered route here in MiniZinc where recursion and a while statement does not exist.
-% Note: this slows down a lot the computation of the solution, since is yet another quadratic constraint.
-array [dom_veh] of var 0..n: first_visit; % first_visit[v] = c <-> vehicle v visits customer c after leaving the depot. If it does not leave the depot, then c = 0.
-array [dom_veh, 1..n] of var 0..n: routes; % routes[v, i] = c <-> vehicle v visits customer c as the i-th customer in its route. If c = 0 then v is not moving or it is coming back to the depot.
-*/
-
 
 % Functions
 function int: calculate_distance(float: x1, float: y1, float: x2, float: y2) =
@@ -109,28 +99,6 @@ constraint forall(v in dom_veh)(
   sum([Demand[i] | i in 1..n where vehicle[i] == v]) <= Capacity[v] % Each vehicle supplies only customers that do not exceed (in total) its capacity.
 );
 
-/*
-% COMMENTED BLOCK 2
-% Decomment this block and COMMENTED BLOCK 1 to enable the computation of the ordered route in MiniZinc (it is not needed in the solving of the model).
-constraint forall(v in dom_veh)(
-  first_visit[v] = next[n+(2*v)-1] <-> (vehicle[n+(2*v)-1] = v /\ next[n+(2*v)-1] <= n)
-);
-
-constraint forall(v in dom_veh)(
-  forall(i in 1..n)(
-    if(i == 1) then
-      routes[v, i] = first_visit[v]
-    else
-      if (vehicle[routes[v, i-1]] = v /\ next[routes[v, i-1]] <= n) then
-        routes[v, i] = next[routes[v, i-1]]
-      else
-        routes[v, i] = 0
-      endif
-    endif
-  )
-);
-*/
-
 
 % Symmetry breaking 
 constraint increasing([vehicle[i] | i in n+1..max(dom_nodes)])::domain; % Couples of depot nodes ("start-trip-exit" and "end-trip-entrance") are assigned in order (the first goes to the first vehicle, etc.).
@@ -139,19 +107,15 @@ constraint forall(i, j in 1..n)(visited_edges[i,j] <-> next[i] = j); % Channelin
 
 constraint lex_lesseq(array1d(visited_edges), [visited_edges[j, i] | i, j in 1..n]); % Leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order is the same, therefore one of the two routes is discarded.
 
-constraint forall(v in dom_veh, i in 1..n)(
-  visited_customers[v, i] = true <-> vehicle[i] = v
-);
+constraint forall(v in dom_veh, i in 1..n)(visited_customers[v, i] <-> vehicle[i] = v); % Channeling between vehicle and visited_customers.
 
 constraint forall(c in array2set(Capacity))(
   let {
     array[int] of dom_veh: vehicles_with_same_capacity = [v | v in dom_veh where Capacity[v] = c]
-  }
-  in
-  forall(v in 1..length(vehicles_with_same_capacity)-1)(
+  } in forall(v in 1..length(vehicles_with_same_capacity)-1)(
     lex_lesseq([visited_customers[v, i] | i in 1..n], [visited_customers[v+1, i] | i in 1..n])
   )
-);
+); % Since vehicle can have the same capacity and therefore serve the same nodes, a lex_lesseq is posted to avoid this possibility.
 
 % Objective values
 var int: total_distance = sum(i in dom_nodes)(
@@ -170,8 +134,8 @@ var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight *
 solve minimize obj_f;
 
 /*
-% COMMENTED BLOCK 3
-% Decomment this block and make sure COMMENTED BLOCK 4 is commented to print solutions for a fancy output in MiniZinc IDE or MiniZinc CLI.
+% FANCY OUTPUT FOR MINIZINC IDE AND CLI
+% Decomment this block and make sureto comment the next one for a fancy output of solutions in MiniZinc IDE or MiniZinc CLI.
 output [
 "Dataset: \(Name)\n",
 "---------------------------\n",
@@ -186,25 +150,48 @@ output [
 ];
 */
 
-/*
-% COMMENTED BLOCK 4
-% Decomment this block if you decommented COMMENTED BLOCK 1 and COMMENTED BLOCK 2.
-output ["\nRoutes\n"];
 
-output [
-  if (i mod n == 0) then 
-    show_int(3, routes[v, i]) ++ "\n"
-  else
-    show_int(3, routes[v, i]) ++ " "
-  endif | v in dom_veh, i in 1..n
-];
-*/
-
-
-% COMMENTED BLOCK 5
-% Decomment this block and make sure COMMENTED BLOCK 3 is commented to print solutions for the Python script.
+% OUTPUT FOR MiniZinc Python API
+% Decomment this block and make sure FANCY OUTPUT FOR MINIZINC IDE AND CLI is commented to print solutions for the Python script (main.py).
 output[show(next)++"\n"];
 output[show(vehicle)++"\n"];
 output["\(used_vehicles)\n"];
 output["\(total_distance)\n"];
 output["\(obj_f)"];
+
+/*
+% ORDERED ROUTES
+% Decomment this block to enable the computation of the ordered route in MiniZinc (it is not needed in the solving of the model).
+% It helps showing the ordered route here in MiniZinc where recursion and a while statement does not exist.
+% Note: this slows down a lot the computation of the solution, since is yet another quadratic constraint.
+array [dom_veh] of var 0..n: first_visit; % first_visit[v] = c <-> vehicle v visits customer c after leaving the depot. If it does not leave the depot, then c = 0.
+array [dom_veh, 1..n] of var 0..n: routes; % routes[v, i] = c <-> vehicle v visits customer c as the i-th customer in its route. If c = 0 then v is not moving or it is coming back to the depot.
+
+constraint forall(v in dom_veh)(
+  first_visit[v] = next[n+(2*v)-1] <-> (vehicle[n+(2*v)-1] = v /\ next[n+(2*v)-1] <= n)
+);
+
+constraint forall(v in dom_veh)(
+  forall(i in 1..n)(
+    if(i == 1) then
+      routes[v, i] = first_visit[v]
+    else
+      if (vehicle[routes[v, i-1]] = v /\ next[routes[v, i-1]] <= n) then
+        routes[v, i] = next[routes[v, i-1]]
+      else
+        routes[v, i] = 0
+      endif
+    endif
+  )
+);
+
+output ["\nRoutes\n"];
+output ["Vehicle 1's route: "];
+output [
+  if (i mod n == 0) then 
+    show_int(3, routes[v, i]) ++ if(i == n /\ v < NumVehicles) then "\nVehicle \(v+1)'s route: " else "" endif
+  else
+    show_int(3, routes[v, i]) ++ " "
+  endif | v in dom_veh, i in 1..n
+];
+*/
