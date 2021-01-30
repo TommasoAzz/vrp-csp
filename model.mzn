@@ -85,12 +85,12 @@ constraint next[max(dom_nodes)] == n+1; % After a visit to the last "end-trip-en
 
 constraint circuit(next)::domain; % Ensures next represent a feasible TSP solution.
 
-constraint let {
-  set of int: customers_start_trip_exit_depot = (1..n union {j | j in n+1..max(dom_nodes) where if (n+1) mod 2 == 0 then j mod 2 == 0 else j mod 2 != 0 endif});
-} in forall(i in customers_start_trip_exit_depot)(
+constraint forall(i in n+1..max(dom_nodes))(
   % The vehicle visiting node i must also visit node next[i].
   % This is true since the constraint applies only to customers and "start-trip-exit" nodes.
-  vehicle[i] = vehicle[next[i]] 
+  if(((n+1) mod 2 == 0 /\ i mod 2 == 0) \/ ((n+1) mod 2 != 0 /\ i mod 2 != 0)) then
+    vehicle[i] = vehicle[next[i]]
+  endif
 );
 
 constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain; % Each vehicle must leave once from the depot and come back once. Note: vehicles that do not move still fakely move twice (because of how depot is regarded).
@@ -131,15 +131,15 @@ var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of veh
 var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight * used_vehicles;
 
 % Solving settings and heuristics
-% solve minimize obj_f;
-% solve ::int_search(next, dom_w_deg, indomain_random) minimize obj_f;
-% solve ::int_search(next, smallest, indomain_random) minimize obj_f;
-% solve ::int_search(next, first_fail, indomain_min) minimize obj_f;
-% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) minimize obj_f;
-% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
-% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 15) minimize obj_f;
-% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 75) minimize obj_f;
-% solve ::int_search(next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 25) minimize obj_f;
+solve minimize obj_f;
+% solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) minimize obj_f;
+% solve ::int_search(vehicle ++ next, smallest, indomain_random) minimize obj_f;
+% solve ::int_search(vehicle ++ next, first_fail, indomain_min) minimize obj_f;
+% solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) minimize obj_f;
+% solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
+% solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 15) minimize obj_f;
+% solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 75) minimize obj_f;
+% solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 25) minimize obj_f;
 
 /*
 % FANCY OUTPUT FOR MINIZINC IDE AND CLI
