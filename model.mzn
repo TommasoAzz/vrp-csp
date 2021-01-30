@@ -85,12 +85,12 @@ constraint next[max(dom_nodes)] == n+1; % After a visit to the last "end-trip-en
 
 constraint circuit(next)::domain; % Ensures next represent a feasible TSP solution.
 
-constraint forall(i in n+1..max(dom_nodes))(
+constraint let {
+  set of int: customers_start_trip_exit_depot = (1..n union {j | j in n+1..max(dom_nodes) where if (n+1) mod 2 == 0 then j mod 2 == 0 else j mod 2 != 0 endif});
+} in forall(i in customers_start_trip_exit_depot)(
   % The vehicle visiting node i must also visit node next[i].
   % This is true since the constraint applies only to customers and "start-trip-exit" nodes.
-  if(((n+1) mod 2 == 0 /\ i mod 2 == 0) \/ ((n+1) mod 2 != 0 /\ i mod 2 != 0)) then
-    vehicle[i] = vehicle[next[i]]
-  endif
+  vehicle[i] = vehicle[next[i]] 
 );
 
 constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain; % Each vehicle must leave once from the depot and come back once. Note: vehicles that do not move still fakely move twice (because of how depot is regarded).
