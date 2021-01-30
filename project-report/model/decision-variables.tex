@@ -2,5 +2,21 @@
 \begin{document}
 
 \subsection{Decision variables}
+After showing the input data and the ``variable" $distances$, we shall present the variables that allow the solution for the model.\\
+We first need to define two concepts:
+\begin{itemize}
+    \item \textit{global route}: the concatenation of all visits of all vehicles to the nodes (customers and the depot), without caring about which vehicle has done a certain visit. The global route must include the visits to all the customers and $2NumVehicles$ ``logic visits" to the depot;
+    \item \textit{vehicle route}: the concatenation of all the visits performed by a specific vehicle, leaving from the depot and ultimately coming back to it. If a vehicle decides not to move, from a logical point of view there will be a move anyway, going from its own exit point to its own entrance point of the depot, which has $d = 0$.
+\end{itemize}
+The decision variables are the following:
+\begin{itemize}
+    \item $next \in \mathbb{D}_N^{|\mathbb{D}_N|}$, represents the nodes visited after a visit, i.e. $next_i = j$ means that in the \textit{global route} the visit performed after visiting $node_i$ is to $node_j$;
+    \item $vehicle \in \mathbb{D}_N^{|\mathbb{D}_N|}$, represents the vehicles that perform visits, i.e. $vehicle_i = v$ means that $node_i$ is visited by vehicle $v$ (both in the \textit{global} and in the \textit{vehicle route}).
+\end{itemize}
+These two would suffice if instances of the problem were small but, for larger instances, they do not. Some extra variables for performing \textit{symmetry breaking} are needed:
+\begin{itemize}
+    \item $visited\_edges \in \{0,1\}^{n\times{}n}$, considering customers as \textit{nodes} and their direct path (no intermediate nodes) between them as \textit{edges}, $visited\_edges_{i,j} = 1$ means that in the \textit{global route}, just after visiting $node_i$, there is a visit to $node_j$;
+    \item $visited\_customers \in \{0,1\}^{NumVehicles\times{}n}$, represents which vehicles perform the visits to customers, i.e. $visited\_customers_{v,i} = 1$ means that vehicle $v$ visits customer $i$.
+\end{itemize}
 
 \end{document}

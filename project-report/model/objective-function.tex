@@ -2,5 +2,29 @@
 \begin{document}
 
 \subsection{Objective function}
+The objective function, i.e. the function which its value needs to be minimized for solving the \textit{VRP} can be of two kinds:
+\begin{enumerate}
+    \item the first kind requires to minimize just the total distance travelled by the vehicles;
+    \item the second kind requires to minimize the total distance together to the number of vehicles that leave the depot, giving weights to the two.
+\end{enumerate}
+\subsubsection{Minimizing the total distance}
+To minimize the total distance we need to compute it first. The expression that allows computing the total distance is:
+\begin{center} % MiniZinc model rows 121-124
+    \begin{math}
+        total\_distance = (\sum_{i = 1, i < next_i}^{\sup{}(\mathbb{D}_N)}{distances_{i, next_i}}) + (\sum_{i = 1, i \geq next_i}^{\sup{}(\mathbb{D}_N)}{distances_{next_i, i}})
+    \end{math}
+\end{center}
+The objective function $f$ is finally $f = total\_distance$.
 
+\subsubsection{Minimizing the total distance and the number of vehicles}
+The total distance is computed like it was presented in the previous sub-sub-section. The total number of vehicles that move is computed as follows:
+\begin{center} % MiniZinc model rows 121-124
+    \begin{math}
+        used\_vehicles = nvalue([vehicle_i \; | \; i \in \{1,\dots,n\})
+    \end{math}
+\end{center}
+The function $nvalue$ returns the number of different values in the array passed as argument.
+Only the first part of the array $vehicle$, the part that has indexes in $\{1,\dots,n\}$, since they refer to vehicle visiting customers.
+It is equivalent bringing all the elements of an array, putting them inside a mathematical set (no duplicated items) and computing the cardinality.\\
+The objective function $f$ is therefore $f = \alpha{}\times{}total\_distance + \beta{}\times{}used\_vehicles, \; s.t. \; \alpha{}, \beta{} \in \mathbb{R}_+, \; \alpha{} + \beta{} = 1$.
 \end{document}
