@@ -1,0 +1,46 @@
+\subsubsection{pr02}
+We executed this instance with time limits set to \textbf{30 s}, \textbf{1 min}, \textbf{2 min}, \textbf{5 min}.\\
+The obtained results were the following:
+{
+\renewcommand{\arraystretch}{2}
+\begin{longtable}[h]{| c | c | c | c | c |}
+    \hline
+    \textbf{Failures} & \multicolumn{3}{c}{Time limit} & \\
+    \hline
+    \textbf{Search strategy} & \textbf{\textit{30 sec}} & \textbf{\textit{1 min}} & \textbf{\textit{2 min}} & \textbf{\textit{5 min}} \\
+    \hline
+    \endhead
+    default search                                & 10534 & 18724 & 70835 & 343982 \\
+    \hline
+    domWdeg, random                               & 10497 & 19825 & 58490 & 299747 \\
+    \hline
+    domWdeg, random, Luby restart L=250           &  4711 & 11754 & 28151 & 125283 \\
+    \hline
+    domWdeg, random, Luby restart L=250, LNS 85\% &   175 &   191 &   455 &   2689 \\
+    \hline
+    domWdeg, random, Luby restart L=250, LNS 15\% &  4264 & 16320 & 52232 & 240096 \\
+    \hline
+\end{longtable}
+}
+
+{
+\renewcommand{\arraystretch}{2}
+\begin{longtable}[h]{| c | c | c | c | c |}
+    \hline
+    \textbf{Objective function} & \multicolumn{3}{c}{Time limit} & \\
+    \hline
+    \textbf{Search strategy} & \textbf{\textit{30 sec}} & \textbf{\textit{1 min}} & \textbf{\textit{2 min}} & \textbf{\textit{5 min}} \\
+    \hline
+    \endhead
+    default search                                & 60927260 & 59756470 & 58672370 & 58613150 \\
+    \hline
+    domWdeg, random                               & 62665740 & 61870190 & 60691370 & 60429650 \\
+    \hline
+    domWdeg, random, Luby restart L=250           & 61235830 & 60676010 & 57212780 & 57153870 \\
+    \hline
+    domWdeg, random, Luby restart L=250, LNS 85\% & 64350170 & 61752770 & 56974800 & 41023190 \\
+    \hline
+    domWdeg, random, Luby restart L=250, LNS 15\% & 61523110 & 58896400 & 55924200 & 55417810 \\
+    \hline
+\end{longtable}
+}
