@@ -22,8 +22,8 @@ A \textit{node} refers to:
     \item an exit point from the depot for each vehicle, which is where each vehicle leaves the depot from, and since there are $NumVehicles$ of them leaving from the same $1$ depot, there are $NumVehicles$ additional nodes (note that this does not mean that there are $NumVehicles$ depots, it just means that from a logical point of view there are that many);
     \item an entrance point to the depot for each vehicle, which is where each vehicle re-enters the depot after leaving (or not), and since there are $NumVehicles$ of them leaving from the same $1$ depot, there are $NumVehicles$ additional nodes.
 \end{itemize}
-That means there are in total $n + 2NumVehicles$ nodes: the first $n$ are referred to the $n$ customers, then there are $2NumVehicles$ nodes representing the exit points and the entrance points for each vehicle, in alternated order (i.e. $exit_{v_1}$, $entrance_{v_1}$, ..., $exit_{v_i}$, $entrance_{v_i}$, ...).\\
-To this number we associate an interval, $I = [1, n + 2NumVehicles]$ and we define the following set: $$\mathbb{D}_N = \{x | x \in I\}$$
+That means there are in total $n + 2 \cdot NumVehicles$ nodes: the first $n$ are referred to the $n$ customers, then there are $2 \cdot NumVehicles$ nodes representing the exit points and the entrance points for each vehicle, in alternated order (i.e. $exit_{v_1}$, $entrance_{v_1}$, ..., $exit_{v_i}$, $entrance_{v_i}$, ...).\\
+To this number we associate an interval, $I = [1, n + 2 \cdot NumVehicles]$ and we define the following set: $$\mathbb{D}_N = \{x | x \in I\}$$
 $\mathbb{D}_N$ stands for ``Domain of Nodes".
 $\mathbb{D}_N$ is an important set, since it will be used often as a domain throughout the presentation of the model in the following sections.\\
 Going back to the definition of the variable for storing the distances, it is defined as follows:

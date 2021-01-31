@@ -5,7 +5,7 @@
 After showing the input data and the ``variable" $distances$, we shall present the variables that allow the solution for the model.\\
 We first need to define two concepts:
 \begin{itemize}
-    \item \textit{global route}: the concatenation of all visits of all vehicles to the nodes (customers and the depot), without caring about which vehicle has done a certain visit. The global route must include the visits to all the customers and $2NumVehicles$ ``logic visits" to the depot;
+    \item \textit{global route}: the concatenation of all visits of all vehicles to the nodes (customers and the depot), without caring about which vehicle has done a certain visit. The global route must include the visits to all the customers and $2 \cdot NumVehicles$ ``logic visits" to the depot;
     \item \textit{vehicle route}: the concatenation of all the visits performed by a specific vehicle, leaving from the depot and ultimately coming back to it. If a vehicle decides not to move, from a logical point of view there will be a move anyway, going from its own exit point to its own entrance point of the depot, which has $d = 0$.
 \end{itemize}
 The decision variables are the following:
