@@ -161,5 +161,5 @@ output [
 % Decomment this block and make sure FANCY OUTPUT FOR MINIZINC IDE AND CLI is commented to print solutions for the Python script (main.py).
 output[show(next)++"\n"];
 output[show(vehicle)++"\n"];
-output["\(used_vehicles)\n"];
 output["\(total_distance)\n"];
+output[\(obj_f)\n"];
