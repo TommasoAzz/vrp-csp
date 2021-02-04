@@ -6,15 +6,15 @@ Now the constraints of the problem will be presented. Since the model is designe
 Those will be presented \textit{as is} and described for what they do, since their definition is identical for all \textit{CP} solvers (of course the implementation may vary).
 \subsubsection{Problem constraints}
 Let's start with the problem constraints, since without them the solution would not be feasible.\\
-\begin{center} % MiniZinc model rows 72-82
-    \begin{math}
+\begin{center}
+    \begin{equation}
         next_i =
         \begin{cases}
             i+1, & (\text{$n, i$} \; are \; even) \; \vee \; (\text{$n, i$} \; are \; odd)\\
             \text{$k \in\{1, \dots, n, i+1\}$}, & (\text{$n$} \; is \; even \; \wedge \; \text{$i$} \; is \; odd ) \; \vee \; (\text{$n$} \; is \; odd \; \wedge \; \text{$i$} \; is \; even )
         \end{cases},
         \forall i \in \{n+1,\dots,\sup{}(\mathbb{D}_N) - 1\}
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires that:
 \begin{itemize}
@@ -22,83 +22,83 @@ This constraint requires that:
     \item after a visit to an exit point of the depot performed by a vehicle, the same vehicle visits either a customer ($1 \leq next_i \leq n$) or its entrance point in the depot ($i+1$), in this last case it means the vehicle will stay in the depot (it is a ``logical move").
 \end{itemize}
 
-\begin{center} % MiniZinc model row 84
-    \begin{math}
+\begin{center}
+    \begin{equation}
         next_{sup(\mathbb{D}_N)} = n+1
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires that after a visit in the \textit{global route} to the last entrance of the depot the following visit will be to the first exit of the depot. This is just a way for linking the end and the beginning of the \textit{Hamiltonian cycle} required for solving the implicit \textbf{TSP}.
 
-\begin{center} % MiniZinc model row 86
-    \begin{math}
+\begin{center}
+    \begin{equation}
         circuit(next)
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint ensures that the array $next$ represents an \textit{Hamiltonian cycle} in the \textit{global route}.
 
-\begin{center} % MiniZinc model rows 88-94
-    \begin{math}
+\begin{center}
+    \begin{equation}
         vehicle_i =
         \begin{cases}
             vehicle_{next_i}, & (\text{$n+1, i$} \; are \; even) \; \vee \; (\text{$n+1, i$} \; are \; odd)\\
             \text{$v \in \{1,\dots,NumVehicles\}$}, & (\text{$n$} \; is \; even \; \wedge \; \text{$i$} \; is \; odd ) \; \vee \; (\text{$n$} \; is \; odd \; \wedge \; \text{$i$} \; is \; even )
         \end{cases},
         \forall i \in \{1,\dots,n,n+1,\dots,\sup{}(\mathbb{D}_N) - 1\}
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires to link the vehicle that visits $node_i$ to the vehicle that visits $node_{next_i}$, when $i$ is an exit point from the depot.
 Links between other values of $i$ and the corresponding $next_i$ are performed via the previous constraint and the following one.
 
-\begin{center} % MiniZinc model row 96
-    \begin{math}
+\begin{center}
+    \begin{equation}
         gcc([vehicle_i \; | \; i \in \{n+1,\dots,\sup{}(\mathbb{D}_N)\}], \; \{1,\dots,NumVehicles\}, \; c \in \{2\}^{NumVehicles})
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires that in the array $vehicle$, from $vehicle_{n+1}$ to $vehicle_{\sup{}(\mathbb{D}_N)}$, there are exactly twice the assignment of each vehicle, meaning that each vehicle can leave from and come back to the depot just once.
 
-\begin{center} % MiniZinc model rows 98-100
-    \begin{math}
+\begin{center}
+    \begin{equation}
         (\sum_{i = 1 \; | vehicle_i = v}^n{Demand_i}) \leq Capacity_v \; \forall v \in \{1,\dots,NumVehicles\}
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires that the delivery of goods for each vehicle does not exceed the vehicle's capacity.
 
 \subsubsection{Implied constraints}
 Let's continue presenting the constraints, continuing with the implied constraints. These could be omitted but can improve the reduction of the search space and therefore are inserted into the model.\\
-\begin{center} % MiniZinc model row 65
-    \begin{math}
+\begin{center}
+    \begin{equation}
         (\sum_{d \in Demand}{d}) \leq (\sum_{c \in Capacity}{c})
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires that the sum of the customers' demands must be smaller or equal than the available capacity of the vehicles, otherwise the problem is unsatisfiable.
 
-\begin{center} % MiniZinc model row 67
-    \begin{math}
+\begin{center}
+    \begin{equation}
         alldifferent(next)
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires that all \textit{nodes} must be visited exactly once.
 
 \begin{center}
-    \begin{math}
+    \begin{equation}
         next_i \neq i, \forall i \in \mathbb{D}_N
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires that after visiting a certain \textit{node} the next visit cannot be to the same \textit{node}.
 
 \subsubsection{Symmetry breaking constraints}
 To finalize this constraint sub-section we shall present the symmetry breaking constraint, i.e. constraints that remove some symmetrical solutions in order to reduce the search space.
-\begin{center} % MiniZinc model row 104
-    \begin{math}
+\begin{center}
+    \begin{equation}
         increasing([vehicle_i \; | \; \forall i \in \{n+1,\dots,\sup{}(\mathbb{D}_N)\}])
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint requires the previously presented \textit{gcc} constraint to distribute the exit and entrance points of the depot for the vehicles in order (e.g. the second exit and entrance are related to the second vehicle).
 
-\begin{center} % MiniZinc model row 108
-    \begin{math}
+\begin{center}
+    \begin{equation}
         lex\leq(original\_path, reversed\_path) \; ,
-    \end{math}\\
+    \end{equation}\\
     \begin{math}
         original\_path = [
             \begin{cases}
@@ -118,20 +118,20 @@ This constraint requires the previously presented \textit{gcc} constraint to dis
 \end{center}
 This constraint is needed for the following reason: leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order, is the same thing. Therefore one of the two routes can be discarded.
 
-\begin{center} % MiniZinc model row 110
-    \begin{math}
+\begin{center}
+    \begin{equation}
         visited\_customers_{v,i} = 1 \Leftrightarrow vehicle_i = v, \; \forall v \in \{1,\dots,N\}, \forall i \in \{1,\dots,n\}
-    \end{math}
+    \end{equation}
 \end{center}
 This is a channelling constraint between the variable $visited\_customers$ and $vehicle$.
 
-\begin{center} % MiniZinc model rows 112-118
-    \begin{math}
+\begin{center}
+    \begin{equation}
         lex\leq(visited\_customers_{v}, visited\_customers_{v+1}), \;
         \forall v \in \{1,\dots,\mathbb{V}_{C}\}, \;
         \mathbb{V}_{C} = \{v \; | \; \forall v \in \{1,\dots,NumVehicles\}, Capacity_v = c\}, \;
         \forall c \in Capacity
-    \end{math}
+    \end{equation}
 \end{center}
 This constraint is needed for the following reason: vehicles with the same capacity could exchange routes and the solution would still (i.e. the objective function) be the same. Therefore with $lex\leq$ those symmetries are remove since assignments are placed in order.
 
