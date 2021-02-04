@@ -13,9 +13,8 @@ The decision variables are the following:
     \item $next \in \mathbb{D}_N^{|\mathbb{D}_N|}$, represents the nodes visited after a visit, i.e. $next_i = j$ means that in the \textit{global route} the visit performed after visiting $node_i$ is to $node_j$;
     \item $vehicle \in \mathbb{D}_N^{|\mathbb{D}_N|}$, represents the vehicles that perform visits, i.e. $vehicle_i = v$ means that $node_i$ is visited by vehicle $v$ (both in the \textit{global} and in the \textit{vehicle route}).
 \end{itemize}
-These two would suffice if instances of the problem were small but, for larger instances, they do not. Some extra variables for performing \textit{symmetry breaking} are needed:
+These two would suffice if instances of the problem were small but, for larger instances, they do not. An extra variable for performing \textit{symmetry breaking} is needed:
 \begin{itemize}
-    \item $visited\_edges \in \{0,1\}^{n\times{}n}$, considering customers as \textit{nodes} and their direct path (no intermediate nodes) between them as \textit{edges}, $visited\_edges_{i,j} = 1$ means that in the \textit{global route}, just after visiting $node_i$, there is a visit to $node_j$;
     \item $visited\_customers \in \{0,1\}^{NumVehicles\times{}n}$, represents which vehicles perform the visits to customers, i.e. $visited\_customers_{v,i} = 1$ means that vehicle $v$ visits customer $i$.
 \end{itemize}
 

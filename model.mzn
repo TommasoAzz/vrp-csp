@@ -35,8 +35,6 @@ array [dom_nodes] of var dom_nodes: next; % next[i] = n <-> node n is visited af
 
 array [dom_nodes] of var dom_veh: vehicle; % vehicle[i] = v <-> vehicle v visits node i.
 
-% array[1..n, 1..n] of var bool: visited_edges;
-
 array[dom_veh, 1..n] of var bool: visited_customers;
 
 
@@ -103,11 +101,10 @@ constraint forall(v in dom_veh)(
 % Symmetry breaking 
 constraint increasing([vehicle[i] | i in n+1..max(dom_nodes)])::domain; % Couples of depot nodes ("start-trip-exit" and "end-trip-entrance") are assigned in order (the first goes to the first vehicle, etc.).
 
-% constraint forall(i, j in 1..n)(visited_edges[i,j] <-> next[i] = j); % Channeling between next and visited_edges.
-
-% constraint lex_lesseq(array1d(visited_edges), [visited_edges[j, i] | i, j in 1..n]); % Leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order is the same, therefore one of the two routes is discarded.
-
-constraint lex_lesseq([if next[i] > n then 0 else next[i] endif | i in 1..n], [sum([i | i in 1..n where next[i] = j /\ j <= n /\ i != j]) | j in 1..n]);
+constraint lex_lesseq(
+  [if next[i] > n then 0 else next[i] endif | i in 1..n],
+  [sum([i | i in 1..n where next[i] = j /\ j <= n /\ i != j]) | j in 1..n]
+); % Leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order is the same, therefore one of the two routes is discarded.
 
 constraint forall(v in dom_veh, i in 1..n)(visited_customers[v, i] <-> vehicle[i] = v); % Channeling between vehicle and visited_customers.
 

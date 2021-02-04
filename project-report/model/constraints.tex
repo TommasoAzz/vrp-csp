@@ -10,7 +10,7 @@ Let's start with the problem constraints, since without them the solution would 
     \begin{math}
         next_i =
         \begin{cases}
-            i+1, & \text{$n, i$} \; are \; even \; \vee \; \text{$n, i$} \; are \; odd\\
+            i+1, & (\text{$n, i$} \; are \; even) \; \vee \; (\text{$n, i$} \; are \; odd)\\
             \text{$k \in\{1, \dots, n, i+1\}$}, & (\text{$n$} \; is \; even \; \wedge \; \text{$i$} \; is \; odd ) \; \vee \; (\text{$n$} \; is \; odd \; \wedge \; \text{$i$} \; is \; even )
         \end{cases},
         \forall i \in \{n+1,\dots,\sup{}(\mathbb{D}_N) - 1\}
@@ -40,7 +40,7 @@ This constraint ensures that the array $next$ represents an \textit{Hamiltonian 
     \begin{math}
         vehicle_i =
         \begin{cases}
-            vehicle_{next_i}, & \text{$n+1, i$} \; are \; even \; \vee \; \text{$n+1, i$} \; are \; odd\\
+            vehicle_{next_i}, & (\text{$n+1, i$} \; are \; even) \; \vee \; (\text{$n+1, i$} \; are \; odd)\\
             \text{$v \in \{1,\dots,NumVehicles\}$}, & (\text{$n$} \; is \; even \; \wedge \; \text{$i$} \; is \; odd ) \; \vee \; (\text{$n$} \; is \; odd \; \wedge \; \text{$i$} \; is \; even )
         \end{cases},
         \forall i \in \{1,\dots,n,n+1,\dots,\sup{}(\mathbb{D}_N) - 1\}
@@ -90,21 +90,30 @@ This constraint requires that after visiting a certain \textit{node} the next vi
 To finalize this constraint sub-section we shall present the symmetry breaking constraint, i.e. constraints that remove some symmetrical solutions in order to reduce the search space.
 \begin{center} % MiniZinc model row 104
     \begin{math}
-        increasing([vehicle_i \; | \; i \in \{n+1,\dots,\sup{}(\mathbb{D}_N)\}])
+        increasing([vehicle_i \; | \; \forall i \in \{n+1,\dots,\sup{}(\mathbb{D}_N)\}])
     \end{math}
 \end{center}
 This constraint requires the previously presented \textit{gcc} constraint to distribute the exit and entrance points of the depot for the vehicles in order (e.g. the second exit and entrance are related to the second vehicle).
 
-\begin{center} % MiniZinc model row 106
-    \begin{math}
-        visited\_edges_{i,j} = 1 \Leftrightarrow next_i = j, \; \forall i,j \in \{1,\dots,n\}
-    \end{math}
-\end{center}
-This is a channelling constraint between the variable $visited\_edges$ and $next$.
-
 \begin{center} % MiniZinc model row 108
     \begin{math}
-        lex\leq(visited\_edges, [visited\_edges_{j,i} | i,j \in \{1,\dots,n\}])
+        lex\leq(original\_path, reversed\_path) \; ,
+    \end{math}\\
+    \begin{math}
+        original\_path = [
+            \begin{cases}
+                next_i, & next_i \leq n\\
+                0, & next_i > n
+            \end{cases} \; | \; \forall{} i \in \{1,\dots,n\}
+        ] \; ,
+    \end{math}\\
+    \begin{math}
+        reversed\_path = [
+            \begin{cases}
+                next_i, & \exists \; next_i \; s.t. \; next_i = j\\
+                0, & \nexists \;  next_i \; s.t. \; next_i = j
+            \end{cases} \; | \; \forall{} j \in \{1,\dots,n\}
+        ]
     \end{math}
 \end{center}
 This constraint is needed for the following reason: leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order, is the same thing. Therefore one of the two routes can be discarded.
@@ -120,7 +129,7 @@ This is a channelling constraint between the variable $visited\_customers$ and $
     \begin{math}
         lex\leq(visited\_customers_{v}, visited\_customers_{v+1}), \;
         \forall v \in \{1,\dots,\mathbb{V}_{C}\}, \;
-        \mathbb{V}_{C} = \{v | v \in \{1,\dots,NumVehicles\}, Capacity_v = c\}, \;
+        \mathbb{V}_{C} = \{v \; | \; \forall v \in \{1,\dots,NumVehicles\}, Capacity_v = c\}, \;
         \forall c \in Capacity
     \end{math}
 \end{center}
