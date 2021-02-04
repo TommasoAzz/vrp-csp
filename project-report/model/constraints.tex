@@ -43,8 +43,10 @@ This constraint ensures that the array $next$ represents an \textit{Hamiltonian 
             vehicle_{next_i}, & (\text{$n+1, i$} \; are \; even) \; \vee \; (\text{$n+1, i$} \; are \; odd)\\
             \text{$v \in \{1,\dots,NumVehicles\}$}, & (\text{$n$} \; is \; even \; \wedge \; \text{$i$} \; is \; odd ) \; \vee \; (\text{$n$} \; is \; odd \; \wedge \; \text{$i$} \; is \; even )
         \end{cases},
+    \end{equation}\\
+    \begin{math}
         \forall i \in \{1,\dots,n,n+1,\dots,\sup{}(\mathbb{D}_N) - 1\}
-    \end{equation}
+    \end{math}
 \end{center}
 This constraint requires to link the vehicle that visits $node_i$ to the vehicle that visits $node_{next_i}$, when $i$ is an exit point from the depot.
 Links between other values of $i$ and the corresponding $next_i$ are performed via the previous constraint and the following one.
@@ -127,11 +129,11 @@ This is a channelling constraint between the variable $visited\_customers$ and $
 
 \begin{center}
     \begin{equation}
-        lex\leq(visited\_customers_{v}, visited\_customers_{v+1}), \;
-        \forall v \in \{1,\dots,\mathbb{V}_{C}\}, \;
-        \mathbb{V}_{C} = \{v \; | \; \forall v \in \{1,\dots,NumVehicles\}, Capacity_v = c\}, \;
-        \forall c \in Capacity
-    \end{equation}
+        lex\leq(visited\_customers_{v}, visited\_customers_{v+1}), \; \forall v \in \{1,\dots,\mathbb{V}_{C}\}, \; \forall c \in Capacity
+    \end{equation}\\
+    \begin{math}
+        \mathbb{V}_{C} = \{v \; | \; \forall v \in \{1,\dots,NumVehicles\}, \; Capacity_v = c\}
+    \end{math}
 \end{center}
 This constraint is needed for the following reason: vehicles with the same capacity could exchange routes and the solution would still (i.e. the objective function) be the same. Therefore with $lex\leq$ those symmetries are remove since assignments are placed in order.
 
