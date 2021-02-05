@@ -137,7 +137,6 @@ var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight *
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 15) minimize obj_f;
 %solve ::int_search(vehicle ++ next, first_fail, indomain_min) minimize obj_f;
-%solve ::int_search(vehicle ++ next, smallest, indomain_min) minimize obj_f;
 
 /*
 % FANCY OUTPUT FOR MINIZINC IDE AND CLI
