@@ -1,4 +1,4 @@
-\subsubsection{mini-example}
+\subsubsection{example}
 The obtained results were the following:
 {
 \renewcommand{\arraystretch}{2}
@@ -44,6 +44,26 @@ The obtained results were the following:
     domWdeg, random, Luby restart L=250, LNS 15\% & 496120 & 496120 & 496120 & 496120 \\
     \hline
     first fail, min                               & 496120 & 496120 & 496120 & 496120 \\
+    \hline
+\end{longtable}
+}
+
+{
+\renewcommand{\arraystretch}{2}
+\begin{longtable}[h]{| c | c | c | c |}
+    \hline
+    \textbf{Weights} & \textbf{Objective function} & \textbf{Total distance} & \textbf{Used vehicles} \\
+    \hline
+    \endhead
+    $\alpha = 10, \beta = 0$ & 496.120 & 49.612 & 2 \\
+    \hline
+    $\alpha = 7, \beta = 3$  & 347.293 & 49.612 & 3 \\
+    \hline
+    $\alpha = 5, \beta = 5$  & 248.075 & 49.612 & 3 \\
+    \hline
+    $\alpha = 3, \beta = 7$  & 148.857 & 49.612 & 3 \\
+    \hline
+    $\alpha = 0, \beta = 10$ &      30 & 63.012 & 3 \\
     \hline
 \end{longtable}
 }
