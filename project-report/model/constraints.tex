@@ -97,26 +97,10 @@ To finalize this constraint sub-section we shall present the symmetry breaking c
 \end{center}
 This constraint requires the previously presented \textit{gcc} constraint to distribute the exit and entrance points of the depot for the vehicles in order (e.g. the second exit and entrance are related to the second vehicle).
 
-\begin{center}
+\begin{center} % MiniZinc model row 108
     \begin{equation}
-        lex\leq(original\_path, reversed\_path) \; ,
-    \end{equation}\\
-    \begin{math}
-        original\_path = [
-            \begin{cases}
-                next_i, & next_i \leq n\\
-                0, & next_i > n
-            \end{cases} \; | \; \forall{} i \in \{1,\dots,n\}
-        ] \; ,
-    \end{math}\\
-    \begin{math}
-        reversed\_path = [
-            \begin{cases}
-                next_i, & \exists \; next_i \; s.t. \; next_i = j\\
-                0, & \nexists \;  next_i \; s.t. \; next_i = j
-            \end{cases} \; | \; \forall{} j \in \{1,\dots,n\}
-        ]
-    \end{math}
+        lex\leq(visited\_edges, [visited\_edges_{j,i} | i,j \in \{1,\dots,n\}])
+    \end{equation}
 \end{center}
 This constraint is needed for the following reason: leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order, is the same thing. Therefore one of the two routes can be discarded.
 
