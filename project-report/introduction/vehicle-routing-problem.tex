@@ -4,11 +4,11 @@
 \subsection{Vehicle Routing Problem}
 The problem we will describe in this report is, as the title says, the \textbf{Vehicle Routing Problem}, \textbf{VRP} for short.
 VRP is a combinatorial optimization problem in which the goal is to optimize the routes that a fleet of vehicles travels, knowing that each vehicle must start its route
-from a depot and end it in a depot, possibly the same. The reason why these vehicles need to travel is to visit customers that demand certain goods to be delivered to them.\\
+from a depot and end it in a depot, which can be the same. The reason why these vehicles need to travel is to visit customers that demand certain goods to be delivered to them.\\
 VRP is a generalization of another well-known problem, the \textbf{Travelling Salesman Problem}, \textbf{TSP} for short, in which the shortest path for visiting a list of places by just one vehicle (the ``salesman") must be found and minimized.
 VRP is \textit{NP-hard} and can be solved through \textit{mathematical programming}, such as \textit{Integer Linear Programming} (\textit{ILP}) or \textit{Constraint Programming} (\textit{CP}).
-Big instances of the problem can be quite hard to solve, and this will be shown in the following chapters of this report.\\
-Visiting customers by the fleet of vehicles is actually just a part of the problem. There are many variants, that specify different needs:
+Big instances of the problem can be quite hard to solve, and this poses a series of challenges to overcome, which will be shown in the following sections of this report.\\
+Visiting customers by the fleet of vehicles is actually just one part of the problem. There are many variants, that specify different needs:
 \begin{itemize}
     \item maximizing the total profit by the vehicles, without the need to visit all customers, given that a visit to a customer allows to achieve a certain profit;
     \item moving items from a pickup place to another;
@@ -16,6 +16,6 @@ Visiting customers by the fleet of vehicles is actually just a part of the probl
     \item visiting all customers but vehicles have a maximum capacity and therefore they have a limit of customers they can visit;
     \item many more.
 \end{itemize}
-This report will go in detail on how the VRP with vehicles that have a maximum capacity can been solved with Constraint Programming.
+This report will go in detail on how the VRP with vehicles that have a maximum capacity can been solved with \textit{Constraint Programming}.
 
 \end{document}
