@@ -1,4 +1,4 @@
-Name = "Toy mini-example";
+Name = "mini-example";
 locX = [10,19,13,8];
 locY = [9,18,15,18];
 Demand = [2,3,4];

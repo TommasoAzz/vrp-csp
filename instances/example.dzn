@@ -1,7 +1,6 @@
-Name = "Toy example";
+Name = "example";
 locX = [10,19,13,8,6,14];
 locY = [9,18,15,18,13,12];
 Demand = [2,3,4,5,2];
 NumVehicles = 4;
 Capacity = [8,7,5,2];
-%Capacity = [7,7,2];

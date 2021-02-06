@@ -35,9 +35,9 @@ array [dom_nodes] of var dom_nodes: next; % next[i] = n <-> node n is visited af
 
 array [dom_nodes] of var dom_veh: vehicle; % vehicle[i] = v <-> vehicle v visits node i.
 
-array[1..n, 1..n] of var bool: visited_edges;
+array[1..n, 1..n] of var bool: visited_edges; % visited_edges[i,j] <-> some vehicle goes from customer i to customer j (and not viceversa).
 
-array[dom_veh, 1..n] of var bool: visited_customers;
+array[dom_veh, 1..n] of var bool: visited_customers; % visited_customers[v, i] <-> vehicle v visits customer i.
 
 
 % Functions
@@ -62,13 +62,17 @@ constraint forall(c1, c2 in dom_nodes where c1 < c2)(
 
 
 % Implied constraints
+% Constraint (7)
 constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the customers' demands must be lesser or equal than the available capacity of the vehicles otherwise the problem is unsatisfiable.
 
+% Constraint (8)
 constraint alldifferent(next)::domain; % All nodes must be visited exactly once (note: the depot is considered as multiple nodes and with an entrance and an exit, therefore all these parts have to be visited once too).
 
+% Constraint (9)
 constraint forall(i in dom_nodes)(next[i] != i); % After visiting node i the next visit cannot be to node i.
 
 % Problem constraints
+% Constraint (1)
 constraint forall(i in n+1..max(dom_nodes)-1)(
     % Remember the depot is viewed (therefore exists in the array next) not once but 2*NumVehicles times.
     if((n mod 2 == 0 /\ i mod 2 == 0) \/ (n mod 2 != 0 /\ i mod 2 != 0)) then
@@ -81,10 +85,13 @@ constraint forall(i in n+1..max(dom_nodes)-1)(
     endif
 );
 
+% Constraint (2)
 constraint next[max(dom_nodes)] == n+1; % After a visit to the last "end-trip-entrance" the following visit must be to the first "start-trip-exit".
 
+% Constraint (3)
 constraint circuit(next)::domain; % Ensures next represent a feasible TSP solution.
 
+% Constraint (4)
 constraint let {
   set of int: customers_start_trip_exit_depot = (1..n union {j | j in n+1..max(dom_nodes) where if (n+1) mod 2 == 0 then j mod 2 == 0 else j mod 2 != 0 endif});
 } in forall(i in customers_start_trip_exit_depot)(
@@ -93,22 +100,29 @@ constraint let {
   vehicle[i] = vehicle[next[i]] 
 );
 
+% Constraint (5)
 constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain; % Each vehicle must leave once from the depot and come back once. Note: vehicles that do not move still fakely move twice (because of how depot is regarded).
 
+% Constraint (6)
 constraint forall(v in dom_veh)(
   sum([Demand[i] | i in 1..n where vehicle[i] == v]) <= Capacity[v] % Each vehicle supplies only customers that do not exceed (in total) its capacity.
 );
 
 
 % Symmetry breaking 
+% Constraint (10)
 constraint increasing([vehicle[i] | i in n+1..max(dom_nodes)])::domain; % Couples of depot nodes ("start-trip-exit" and "end-trip-entrance") are assigned in order (the first goes to the first vehicle, etc.).
 
+% Constraint (11)
 constraint forall(i, j in 1..n)(visited_edges[i,j] <-> next[i] = j); % Channeling between next and visited_edges.
 
+% Constraint (12)
 constraint lex_lesseq(array1d(visited_edges), [visited_edges[j, i] | i, j in 1..n]); % Leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order is the same, therefore one of the two routes is discarded.
 
+% Constraint (13)
 constraint forall(v in dom_veh, i in 1..n)(visited_customers[v, i] <-> vehicle[i] = v); % Channeling between vehicle and visited_customers.
 
+% Constraint (14)
 constraint forall(c in array2set(Capacity))(
   let {
     array[int] of dom_veh: vehicles_with_same_capacity = [v | v in dom_veh where Capacity[v] = c]
@@ -118,31 +132,31 @@ constraint forall(c in array2set(Capacity))(
 ); % Since vehicle can have the same capacity and therefore serve the same nodes, a lex_lesseq is posted to avoid this possibility.
 
 % Objective values
+% Objective function (15)
 var int: total_distance = sum(i in dom_nodes)(
   % The matrix distances is upper triangular.
   if i < next[i] then distances[i, next[i]] else distances[next[i], i] endif  
 ); % Total distance travelled by the vehicles.
 0..10: total_distance_weight = 10; % Total distance weight in the objective function (it should be from 0.0 to 1.0 but MiniZinc has problems with that).
 
+% Objective function (17)
 var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of vehicles that leave the depot.
 0..10: used_vehicles_weight = 0; % Used vehicles weight in the objective function (it should be from 0.0 to 1.0 but MiniZinc has problems with that).
 
-% Objective function
+% Objective function (16) and (18)
 var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight * used_vehicles;
 
 % Solving settings and heuristics
 %solve minimize obj_f;
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) minimize obj_f;
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) minimize obj_f;
-%solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
+solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 15) minimize obj_f;
 %solve ::int_search(vehicle ++ next, first_fail, indomain_min) minimize obj_f;
 
-/*
-% FANCY OUTPUT FOR MINIZINC IDE AND CLI
-% Decomment this block and make sureto comment the next one for a fancy output of solutions in MiniZinc IDE or MiniZinc CLI.
 output [
 "Dataset: \(Name)\n",
+"Objective function: \(obj_f)\n",
 "---------------------------\n",
 "Total number of customers: \(n)\n",
 "Depot coordinates: (\(locX[n+1]), \(locY[n+1]))\n",
@@ -153,12 +167,3 @@ output [
 output [
 "Vehicle \(v) has visited customers: " ++ show([i| i in 1..n where vehicle[i] = v]) ++ "\n" | v in dom_veh
 ];
-*/
-
-
-% OUTPUT FOR MiniZinc Python API
-% Decomment this block and make sure FANCY OUTPUT FOR MINIZINC IDE AND CLI is commented to print solutions for the Python script (main.py).
-output[show(next)++"\n"];
-output[show(vehicle)++"\n"];
-output["\(total_distance)\n"];
-output["\(obj_f)\n"];
