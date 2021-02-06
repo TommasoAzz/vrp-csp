@@ -2,10 +2,10 @@
 \begin{document}
 
 \subsection{Experimental results}
-The following results were obtained by executing the instances with the model that was presented in section §2, implemented in \textit{MiniZinc}.\\
+The following results were obtained by executing the instances with the model that was presented in Section §2, implemented in \textit{MiniZinc}.\\
 Each instance was executed with \textbf{4 time limits}, to see the evolution over time of the data to collect, and with \textbf{6 search strategies}, to see the variation between them and which one would suit best for this kind of problem.
-At first, only the \textbf{number of failures} and the \textbf{value of the unweighted objective function}\footnote{By \textit{unweighted objective function} we mean objective function (15) presented in §2.4.1.} were computed.
-After collecting this kind of data and having understood which kind of search strategy suited best, we executed again all the instances with the \textbf{weighted objective function}\footnote{That is objective function (17) presented in §2.4.2.}, with \textbf{5 weights combinations}, employing only the best search strategy we had found for both the number of failures and the objective function value.
+At first, only the \textbf{number of failures} and the \textbf{value of the unweighted objective function}\footnote{By \textit{unweighted objective function} we mean objective function (15) presented in Section §2.4.1.} were computed.
+After collecting this kind of data and having understood which kind of search strategy suited best, we executed again all the instances with the \textbf{weighted objective function}\footnote{That is objective function (17) presented in Section §2.4.2.}, with \textbf{5 weights combinations}, employing only the best search strategy we had found for both the number of failures and the objective function value.
 For that we computed just problem oriented data, i.e. the \textbf{value of the weighted objective function}, the \textbf{total distance travelled by the vehicles} and the \textbf{number of employed vehicles}.\\
 The time limits for which data was collected were:
 \begin{itemize}
@@ -19,7 +19,8 @@ The search strategies for which data was collected were:
     \item \textbf{default}: search strategy automatically chosen by the solver, i.e. Gecode;
     \item \textbf{domWdeg, random}: in the search tree, the variable with the smallest value of domain size divided by its weighted degree (i.e. the number of times the variable has caused a failure in a constraint earlier in the search) is chosen and its value is assigned randomly;
     \item \textbf{domWdeg, random, Luby restart (L = 250)}: like the previous search strategy, but the search is restarted from the top of the search tree after $s_i \cdot L$ search steps are performed, with $s_i$ being the $i$-th number in the Luby sequence (\{1,1,2,1,1,2,4,1,1,\dots\}) and $i$ being the $i$-th restart;
-    \item \textbf{domWdeg, random, Luby restart (L = 250), LNS (85\%)}: like the previous search strategy, but the \textbf{Large Neighbourhood Search (LNS)} heuristic is exploited where, after finding a feasible solution $S$, in the following solution $S'$ a variable value is fixed with a probability of 85\% and the other variables are relaxed;
+    \item \textbf{domWdeg, random, Luby restart (L = 250), LNS (85\%)}: like the previous search strategy, but the \textbf{Large Neighbourhood Search (LNS)} heuristic is exploited; that means that after finding a feasible solution $S$, in the following solution $S'$ a variable value is fixed with a probability of 85\% and the other variables are relaxed;
+    \item \textbf{domWdeg, random, Luby restart (L = 250), LNS (15\%)}: like the previous search strategy, but the probability to fix a variable is now 15\% (we wanted to verify the complementary case);
     \item \textbf{first fail, min}: in the search tree, the variable with the smallest domain size is chosen and its value is assigned to the smallest value in its domain.
 \end{itemize}
 The weights $\alpha$ and $\beta$ for which data was collected were:
@@ -31,6 +32,10 @@ The weights $\alpha$ and $\beta$ for which data was collected were:
     \item $\alpha = 0.0$ and $\beta = 1.0$.
 \end{itemize}
 \textit{Note}: $\alpha$ and $\beta$ in the implementation were multiplied by a factor $10$, since the solver had issues with a floating point objective function. Therefore, the following change was applied: $\alpha, \beta \in \mathbb{Z}_+ \; s.t.\; \alpha + \beta = 10$.
+\\
+\\
+(This space was intentionally left blank.)
+\newpage
 
 \subfile{experimental-results/mini-example}
 \subfile{experimental-results/example}
