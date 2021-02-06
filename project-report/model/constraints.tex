@@ -97,6 +97,13 @@ To finalize this constraint subsection we shall present the symmetry breaking co
 \end{center}
 This constraint requires the previously presented \textit{gcc} constraint to distribute the exit and entrance points of the depot for the vehicles in order (e.g. the second exit and entrance are related to the second vehicle).
 
+\begin{center}
+    \begin{equation}
+        visited\_edges_{i,j} = 1 \Leftrightarrow next_i = j, \; \forall i,j \in \{1,\dots,n\}
+    \end{equation}
+\end{center}
+This is a channelling constraint between the variable $visited\_edges$ and $next$.
+
 \begin{center} % MiniZinc model row 108
     \begin{equation}
         lex\leq(visited\_edges, visited\_edges^T)
