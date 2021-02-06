@@ -5,27 +5,27 @@
 The input data of the model is given with the following structure:
 \begin{itemize}
     \item $Name$, a string variable with the dataset name, for labelling reasons;
-    \item $locX \in \mathbb{R}^{n+1}$, it is an array of coordinates on the x-axis, representing the longitude of the locations of all the $n$ customers and of the depot (the $n+1$-th item in $locX$);
-    \item $locY \in \mathbb{R}^{n+1}$, it is an array of coordinates on the y-axis, representing the latitude of the locations of all the $n$ customers and of the depot (the $n+1$-th item in $locY$);
+    \item $locX \in \mathbb{R}^{n+1}$, it is an array of coordinates on the x-axis, representing the longitude of the locations of all the $n$ customers and of the depot (which is $locX_{n+1}$);
+    \item $locY \in \mathbb{R}^{n+1}$, it is an array of coordinates on the y-axis, representing the latitude of the locations of all the $n$ customers and of the depot (which is $locY_{n+1}$);
     \item $Demand \in \mathbb{Z}_+^n$, which represents the demands for goods of each one of the $n$ customers (of course, $Demand_i$ is the demand of the $i$-th customer);
-    \item $NumVehicles \in \mathbb{Z}_+$, which represents the number of vehicles that can leave the depot ($NumVehicles = m$, where $m$ is the number of vehicles stated in §1.2);
+    \item $NumVehicles \in \mathbb{Z}_+$, which represents the number of vehicles that can leave the depot ($NumVehicles = m$, where $m$ is the number of vehicles stated in Section 1.2);
     \item $Capacity \in \mathbb{Z}_+^{NumVehicles}$, an array of positive integers which represents the capacity of each one of the $NumVehicles$ vehicles for delivering goods to the customers.
 \end{itemize}
 \noindent
 Since latitude and longitude are given as real coordinates, for simplicity reasons those will be regarded as coordinates of points in the Cartesian coordinate system and the distance function that will be employed will be the Euclidean distance.\\
 Therefore, given two points $P_1 = (x_1, y_1)$ and $P_2 = (x_2, y_2)$, the distance function $d: \mathbb{R}^2 \times \mathbb{R}^2 \rightarrow \mathbb{R}$ is: $$d(P_1, P_2) = \sqrt{(x_1 - x_2)^2+(y_1 - y_2)^2}$$
-To store the distances between customers, and between customers and the depot, a variable is introduced in the model, but it will not count as such, since after its initialization it will never change.
+To store the distances between customers and between customers and the depot, a variable is introduced in the model. This variable will not count as such, since it never changes after its initialization.\\
 Before doing so, we shall introduce the notion of \textit{node} that will be used throughout this report.\\
 A \textit{node} refers to:
 \begin{itemize}
     \item a customer and since there are $n$ customers, there are also $n$ nodes;
-    \item an exit point from the depot for each vehicle, which is where each vehicle leaves the depot from, and since there are $NumVehicles$ of them leaving from the same $1$ depot, there are $NumVehicles$ additional nodes (note that this does not mean that there are $NumVehicles$ depots, it just means that from a logical point of view there are that many);
-    \item an entrance point to the depot for each vehicle, which is where each vehicle re-enters the depot after leaving (or not), and since there are $NumVehicles$ of them leaving from the same $1$ depot, there are $NumVehicles$ additional nodes.
+    \item an exit point from the depot for a vehicle, which is where the vehicle leaves the depot from; since there are $NumVehicles$ of them leaving from the same $1$ depot, there are $NumVehicles$ additional nodes (note that this does not mean that there are $NumVehicles$ depots, it just means that from a logical point of view there are that many);
+    \item an entrance point to the depot for a vehicle, which is where the vehicle re-enters the depot after leaving (or not); since there are $NumVehicles$ of them leaving from the same $1$ depot, there are $NumVehicles$ additional nodes.
 \end{itemize}
-That means there are in total $n + 2 \cdot NumVehicles$ nodes: the first $n$ are referred to the $n$ customers, then there are $2 \cdot NumVehicles$ nodes representing the exit points and the entrance points for each vehicle, in alternated order (i.e. $exit_{v_1}$, $entrance_{v_1}$, ..., $exit_{v_i}$, $entrance_{v_i}$, ...).\\
+That means there are in total $n + 2 \cdot NumVehicles$ nodes: the first $n$ are referred to the $n$ customers, then there are $2 \cdot NumVehicles$ nodes representing the exit and entrance points for each vehicle, in alternated order (i.e. $exit_{v_1}$, $entrance_{v_1}$, \dots, $exit_{v_i}$, $entrance_{v_i}$, \dots, $exit_{v_{NumVehicles}}$, $entrance_{v_{NumVehicles}}$).\\
 To this number we associate an interval, $I = [1, n + 2 \cdot NumVehicles]$ and we define the following set: $$\mathbb{D}_N = \{x | x \in I\}$$
 $\mathbb{D}_N$ stands for ``Domain of Nodes".
-$\mathbb{D}_N$ is an important set, since it will be used often as a domain throughout the presentation of the model in the following sections.\\
+$\mathbb{D}_N$ is an important set, since it will be used often as a domain throughout the presentation of the model in the following subsections.\\
 Going back to the definition of the variable for storing the distances, it is defined as follows:
 \begin{itemize}
     \item $distances \in \mathbb{R}^{|\mathbb{D}_N|\times{}|\mathbb{D}_N|}$, where $distances_{i,j}$, with $i,j \in \mathbb{D}_N$, represents the distance between nodes $i$ and $j$ (and vice-versa, since the direction does not matter).
@@ -35,9 +35,9 @@ $$distances_{i,j} = {
     \begin{cases}
         d(x_i, x_j), & \text{$i \leq n, j \leq n+1$} \\
         d(x_i, x_{n+1}), & \text{$i \leq n, j > n+1$} \\
-        d(x_{n+1}, x_{n+1}), & \text{$i > n, j > n+1$} \\
+        d(x_{n+1}, x_{n+1}) = 0, & \text{$i > n, j > n+1$} \\
     \end{cases}
 }$$
-$distances_{i,j}$ with indexes $i > n, j < n+1$ is simply not defined, since the presented defined parts are sufficient.
+Elements $distances_{i,j}$ with indexes $i > n, j < n+1$ are simply not defined, since the defined parts are sufficient and the model will take this detail in consideration.
 
 \end{document}

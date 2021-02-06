@@ -19,22 +19,22 @@ The objective function $f$ which needs to be minimized is finally:
     \begin{equation}
         f = total\_distance
     \end{equation}
-\end{center}.
+\end{center}
 
 \subsubsection{Minimizing the total distance and the number of vehicles}
-The total distance is computed like it was presented in the previous sub-sub-section. The total number of vehicles that move is computed as follows:
+The total distance is computed like it was presented in the previous subsubsection. The total number of vehicles that move is computed as follows:
 \begin{center}
     \begin{equation}
-        used\_vehicles = nvalue([vehicle_i \; | \; \forall i \in \{1,\dots,n\})
+        used\_vehicles = nvalue(\{vehicle_1,\dots,vehicle_n\})
     \end{equation}
 \end{center}
 The function $nvalue$ returns the number of different values in the array passed as argument.
-Only the first part of the array $vehicle$, the part that has indexes in $\{1,\dots,n\}$, since they refer to vehicle visiting customers.
-It is equivalent bringing all the elements of an array, putting them inside a mathematical set (no duplicated items) and computing the cardinality.\\
+Only the first part of the array $vehicle$, the part that has indexes in $\{1,\dots,n\}$, since they refer to vehicles visiting customers.
+It is equivalent to bringing all the elements of an array, putting them inside a mathematical set (no duplicated items) and computing the cardinality.\\
 The objective function $f$ which needs to be minimized is therefore:
 \begin{center}
     \begin{equation}
         f = \alpha{} \cdot total\_distance + \beta{} \cdot used\_vehicles, \; s.t. \; \alpha{}, \beta{} \in \mathbb{R}_+, \; \alpha{} + \beta{} = 1
     \end{equation}
-\end{center}.
+\end{center}
 \end{document}
