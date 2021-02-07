@@ -26,7 +26,7 @@ A \textit{node} refers to:
 That means there are in total $n + 2 \cdot NumVehicles$ nodes: the first $n$ are referred to the $n$ customers, then there are $2 \cdot NumVehicles$ nodes representing the exit and entrance points for each vehicle, in alternated order (i.e. $exit_{v_1}$, $entrance_{v_1}$, \dots, $exit_{v_i}$, $entrance_{v_i}$, \dots, $exit_{v_{NumVehicles}}$, $entrance_{v_{NumVehicles}}$).\\
 To this number we associate an interval, $I = [1, n + 2 \cdot NumVehicles]$ and we define the following set: $$\mathbb{D}_N = \{x | x \in I\}$$
 $\mathbb{D}_N$ stands for ``Domain of Nodes".
-$\mathbb{D}_N$ is an important set, since it will be used often as a domain throughout the presentation of the model in the following subsections.\\
+$\mathbb{D}_N$ is an important set, since it will often be used as a domain throughout the presentation of the model in the following subsections.\\
 Going back to the definition of the variable for storing the distances, it is defined as follows:
 \begin{itemize}
     \item $distances \in \mathbb{R}^{|\mathbb{D}_N|\times{}|\mathbb{D}_N|}$, where $distances_{i,j}$, with $i,j \in \mathbb{D}_N$, represents the distance between nodes $i$ and $j$ (and vice-versa, since the direction does not matter).

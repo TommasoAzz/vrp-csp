@@ -6,10 +6,10 @@
 
 \subsubsection{Other symmetry breaking constraints}
 \label{subsubsec:other-symmetry-breaking-constraints}
-The model we designed works well for all the instances we tried but it is quite memory-eager. In fact, some instances can even require up to 10-12 GB of RAM for computing the first feasible solutions.
+The model we designed works well for all the instances we tried, but it is quite memory-eager. In fact, some instances can even require up to 10-12 GB of RAM for computing the first feasible solutions.
 This could be due to the fact that for performing symmetry breaking we require two Boolean matrixes, one of size $n\times{}n$ and the other of size $NumVehicles\times{}n$. Moreover, many constraints have a quadratic time complexity.\\
 To overcome this problem we tried to re-design the symmetry breaking constraint (12) with an \textit{inverted indexes} approach. To do this, we did not need matrix $visited\_edges$ anymore, instead we could simply use the array $next$.
-Therefore $visited\_edges$ and constraint (11) were removed, constraint (12) was replaced by the following constraint:
+Therefore, $visited\_edges$ and constraint (11) were removed, constraint (12) was replaced by the following constraint:
 \begin{center}
     \begin{math}
         lex\leq(original\_path, reversed\_path) \; ,

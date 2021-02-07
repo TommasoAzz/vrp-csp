@@ -113,7 +113,7 @@ This is a channelling constraint between the variable $visited\_edges$ and $next
         lex\leq(visited\_edges, visited\_edges^T)
     \end{equation}
 \end{center}
-This constraint is needed for the following reason: leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order, is the same thing. Therefore one of the two routes can be discarded.\\
+This constraint is needed for the following reason: leaving the depot for visiting some edges and then going back to the depot or leaving it for visiting the same edges in the opposite order, is the same thing. Therefore, one of the two routes can be discarded.\\
 \textit{Note}: $ visited\_edges^T$ is the \textbf{transpose} of matrix $visited\_edges$
 
 \begin{center}
@@ -131,6 +131,6 @@ This is a channelling constraint between the variable $visited\_customers$ and $
         \mathbb{V}_{C} = \{v \; | \; \forall v \in \{1,\dots,NumVehicles\}, \; Capacity_v = c\}
     \end{math}
 \end{center}
-This constraint is needed for the following reason: vehicles with the same capacity could exchange routes and the solution would still (i.e. the objective function) be the same. Therefore with $lex\leq$ those symmetries are removed since assignments are placed in order.
+This constraint is needed for the following reason: vehicles with the same capacity could exchange routes and the solution would still (i.e. the objective function) be the same. Therefore, with $lex\leq$ those symmetries are removed since assignments are placed in order.
 
 \end{document}
