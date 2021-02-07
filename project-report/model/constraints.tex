@@ -6,6 +6,7 @@
 In the following subsection the constraints of the problem will be presented. Since the model is designed for \textit{Constraint Programming} there are many global constraints, which can be more powerful (for instance, compared to ILP constraints) since they try to find different combinatorial substructures for being more efficient and for a better propagation strategy.
 Those will be presented \textit{as is} and described for what they do, since their definition is identical for all \textit{CP} solvers (of course the implementation may vary).
 \subsubsection{Problem constraints}
+\label{subsubsec:problem-constraints}
 Let's start with the problem constraints, since without them the solution would not be feasible.\\
 \begin{center}
     \begin{equation}
@@ -67,6 +68,7 @@ This constraint requires that in the array $vehicle$, from $vehicle_{n+1}$ to $v
 This constraint requires that the delivery of goods for each vehicle does not exceed the vehicle's capacity.
 
 \subsubsection{Implied constraints}
+\label{subsubsec:implied-constraints}
 Let's continue presenting the constraints, following with the implied constraints. These could be omitted but can improve the reduction of the search space and therefore are inserted into the model.\\
 \begin{center}
     \begin{equation}
@@ -90,6 +92,7 @@ This constraint requires that all \textit{nodes} must be visited exactly once.
 This constraint requires that after visiting a certain \textit{node} the next visit cannot be to the same \textit{node}.
 
 \subsubsection{Symmetry breaking constraints}
+\label{subsubsec:symmetry-breaking-constraints}
 To finalize this constraint subsection we shall present the symmetry breaking constraints, i.e. constraints that remove some symmetrical solutions in order to reduce the search space.
 \begin{center}
     \begin{equation}

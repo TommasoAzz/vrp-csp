@@ -9,7 +9,7 @@ The input data of the model is given with the following structure:
     \item $locX \in \mathbb{R}^{n+1}$, it is an array of coordinates on the x-axis, representing the longitude of the locations of all the $n$ customers and of the depot (which is $locX_{n+1}$);
     \item $locY \in \mathbb{R}^{n+1}$, it is an array of coordinates on the y-axis, representing the latitude of the locations of all the $n$ customers and of the depot (which is $locY_{n+1}$);
     \item $Demand \in \mathbb{Z}_+^n$, which represents the demands for goods of each one of the $n$ customers (of course, $Demand_i$ is the demand of the $i$-th customer);
-    \item $NumVehicles \in \mathbb{Z}_+$, which represents the number of vehicles that can leave the depot ($NumVehicles = m$, where $m$ is the number of vehicles stated in Section 1.2);
+    \item $NumVehicles \in \mathbb{Z}_+$, which represents the number of vehicles that can leave the depot ($NumVehicles = m$, where $m$ is the number of vehicles stated in \hyperref[subsec:formal-problem-definition]{Section 1.2});
     \item $Capacity \in \mathbb{Z}_+^{NumVehicles}$, an array of positive integers which represents the capacity of each one of the $NumVehicles$ vehicles for delivering goods to the customers.
 \end{itemize}
 \noindent
