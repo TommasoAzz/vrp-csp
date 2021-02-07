@@ -58,7 +58,7 @@ constraint forall(c1, c2 in dom_nodes where c1 < c2)(
       distances[c1, c2] = 0
     endif
   endif
-); % Computes the distances between customers (and of course customers and depot). Only the lower triangular matrix is sufficient to compute.
+); % Computes the distances between customers (and of course customers and depot). Only the upper triangular matrix is enough to be computed.
 
 
 % Implied constraints
@@ -66,7 +66,7 @@ constraint forall(c1, c2 in dom_nodes where c1 < c2)(
 constraint sum([d | d in Demand]) <= sum([c | c in Capacity]); % The sum of the customers' demands must be lesser or equal than the available capacity of the vehicles otherwise the problem is unsatisfiable.
 
 % Constraint (8)
-constraint alldifferent(next)::domain; % All nodes must be visited exactly once (note: the depot is considered as multiple nodes and with an entrance and an exit, therefore all these parts have to be visited once too).
+constraint alldifferent(next)::domain; % All nodes must be visited exactly once (note: the depot is considered as multiple nodes, with one entrance and one exit for each vehicle, therefore all these parts have to be visited once too).
 
 % Constraint (9)
 constraint forall(i in dom_nodes)(next[i] != i); % After visiting node i the next visit cannot be to node i.
@@ -86,10 +86,10 @@ constraint forall(i in n+1..max(dom_nodes)-1)(
 );
 
 % Constraint (2)
-constraint next[max(dom_nodes)] == n+1; % After a visit to the last "end-trip-entrance" the following visit must be to the first "start-trip-exit".
+constraint next[max(dom_nodes)] == n+1; % After a visit to the last "end-trip-entrance" the following visit must be to the first "start-trip-exit", to close the Hamiltonian cycle.
 
 % Constraint (3)
-constraint circuit(next)::domain; % Ensures next represent a feasible TSP solution.
+constraint circuit(next)::domain; % Ensures the array next represents a feasible TSP solution.
 
 % Constraint (4)
 constraint let {
@@ -101,7 +101,7 @@ constraint let {
 );
 
 % Constraint (5)
-constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain; % Each vehicle must leave once from the depot and come back once. Note: vehicles that do not move still fakely move twice (because of how depot is regarded).
+constraint global_cardinality([vehicle[i] | i in n+1..max(dom_nodes)], dom_veh, [2 | i in dom_veh])::domain; % Each vehicle must leave once from the depot and come back once. Note: vehicles that do not move to visit customer still make two logical visits (because of how depot is regarded).
 
 % Constraint (6)
 constraint forall(v in dom_veh)(
@@ -147,23 +147,27 @@ var int: used_vehicles = nvalue([vehicle[i] | i in 1..n]); % Total number of veh
 var int: obj_f = total_distance_weight * total_distance + used_vehicles_weight * used_vehicles;
 
 % Solving settings and heuristics
-%solve minimize obj_f;
+solve minimize obj_f;
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) minimize obj_f;
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) minimize obj_f;
-solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
+%solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 85) minimize obj_f;
 %solve ::int_search(vehicle ++ next, dom_w_deg, indomain_random) ::restart_luby(250) ::relax_and_reconstruct(next, 15) minimize obj_f;
 %solve ::int_search(vehicle ++ next, first_fail, indomain_min) minimize obj_f;
 
 output [
 "Dataset: \(Name)\n",
-"Objective function: \(obj_f)\n",
+"Objective function value: \(obj_f)\n",
+"Weights for the objective function:\n",
+"- Total distance weight: \(total_distance_weight)\n",
+"- Used vehicles weight: \(used_vehicles_weight)\n",
 "---------------------------\n",
 "Total number of customers: \(n)\n",
 "Depot coordinates: (\(locX[n+1]), \(locY[n+1]))\n",
-"Total distance travelled by vehicles: \(total_distance)\n",
-"Number of vehicles that were moved: \(used_vehicles)/\(NumVehicles)\n"
+"Number of vehicles that were moved: \(used_vehicles)/\(NumVehicles)\n",
+"Total distance travelled by the vehicles: \(total_distance)\n",
+"Routes:\n"
 ];
 
 output [
-"Vehicle \(v) has visited customers: " ++ show([i| i in 1..n where vehicle[i] = v]) ++ "\n" | v in dom_veh
+if length([i| i in 1..n where vehicle[i] = v]) > 0 then "- vehicle \(v) has visited customers: " ++ show([i| i in 1..n where vehicle[i] = v]) ++ "\n" else "- vehicle \(v) stays in the depot" endif | v in dom_veh
 ];
