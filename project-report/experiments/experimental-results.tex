@@ -35,7 +35,11 @@ The weights $\alpha$ and $\beta$ for which data was collected were:
 \textit{Note}: $\alpha$ and $\beta$ in the implementation were multiplied by a factor $10$, since the solver had issues with a floating point objective function. Therefore, the following change was applied: $\alpha, \beta \in \mathbb{Z}_+ \; s.t.\; \alpha + \beta = 10$.
 \\
 \\
-(This space was intentionally left blank.)
+ We will use the following stylistic conventions for presenting the results we obtained while testing the model:
+\begin{itemize}
+    \item when in a table the search strategy is \textit{italicized} it means that it is the best one for that instance;
+    \item when in a table the value is not present and there is a dash (-) it means that the solver did not find a solution for that time limit and search strategy.
+\end{itemize}
 \newpage
 
 \subfile{experimental-results/mini-example}

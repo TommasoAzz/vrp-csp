@@ -20,7 +20,7 @@ Let's start with the problem constraints, since without them the solution would 
 \end{center}
 This constraint requires that:
 \begin{itemize}
-    \item after a visit to an entrance point of the depot performed by a vehicle - the vehicle route is complete - (when $n, i$ are both either even or odd), the following visit is to the exit point of the depot for the following vehicle;
+    \item after a visit to an entrance point of the depot performed by a vehicle - the vehicle route is complete - (when $n, i$ are both either even or odd), the following visit in the global route is to the exit point of the depot for the following vehicle;
     \item after a visit to an exit point of the depot performed by a vehicle, the same vehicle visits either a customer ($1 \leq next_i \leq n$) or its entrance point in the depot ($i+1$), in this last case it means the vehicle will stay in the depot (it is a ``logical move").
 \end{itemize}
 
@@ -50,7 +50,7 @@ This constraint ensures that the array $next$ represents an \textit{Hamiltonian 
         \forall i \in \mathbb{D}_N
     \end{math}
 \end{center}
-This constraint requires to link the vehicle that visits $node_i$ to the vehicle that visits $node_{next_i}$, when $i$ is not an entrance point from the depot.
+This constraint requires to link the vehicle that visits $node_i$ to the vehicle that visits $node_{next_i}$, when $i$ is not an entrance point of the depot.
 Other links between other values of $i$ and the corresponding $vehicle_i$ are performed through the next constraint.
 
 \begin{center}
@@ -131,6 +131,6 @@ This is a channelling constraint between the variable $visited\_customers$ and $
         \mathbb{V}_{C} = \{v \; | \; \forall v \in \{1,\dots,NumVehicles\}, \; Capacity_v = c\}
     \end{math}
 \end{center}
-This constraint is needed for the following reason: vehicles with the same capacity could exchange routes and the solution would still (i.e. the objective function) be the same. Therefore, with $lex\leq$ those symmetries are removed since assignments are placed in order.
+This constraint is needed for the following reason: vehicles with the same capacity could exchange routes and the solution would still (i.e. the objective function) be the same. Therefore, with $lex\leq$ those symmetries are removed since assignments are placed in lexicographic order.
 
 \end{document}
