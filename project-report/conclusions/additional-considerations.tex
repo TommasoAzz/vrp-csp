@@ -4,4 +4,73 @@
 \subsection{Additional considerations}
 \label{subsec:additional-considerations}
 
+\subsubsection{Other symmetry breaking constraints}
+\label{subsubsec:other-symmetry-breaking-constraints}
+The model we designed works well for all the instances we tried but it is quite memory-eager. In fact, some instances can even require up to 10-12 GB of RAM for computing the first feasible solutions.
+This could be due to the fact that for performing symmetry breaking we require two Boolean matrixes, one of size $n\times{}n$ and the other of size $NumVehicles\times{}n$. Moreover, many constraints have a quadratic time complexity.\\
+To overcome this problem we tried to re-design the symmetry breaking constraint (12) with an \textit{inverted indexes} approach. To do this, we did not need matrix $visited\_edges$ anymore, instead we could simply use the array $next$.
+Therefore $visited\_edges$ and constraint (11) were removed, constraint (12) was replaced by the following constraint:
+\begin{center}
+    \begin{math}
+        lex\leq(original\_path, reversed\_path) \; ,
+    \end{math}\\
+    \begin{math}
+        original\_path = [
+            \begin{cases}
+                next_i, & next_i \leq n\\
+                0, & next_i > n
+            \end{cases} \; | \; \forall{} i \in \{1,\dots,n\}
+        ] \; ,
+    \end{math}\\
+    \begin{math}
+        reversed\_path = [
+            \begin{cases}
+                next_i, & \exists \; i \in \{1,\dots,n\} \; s.t. \; next_i = j\\
+                0, & otherwise
+            \end{cases} \; | \; \forall{} j \in \{1,\dots,n\}
+        ]
+    \end{math}
+\end{center}
+In this constraint, $original\_path$ replaces $visited\_edges$ and $reversed\_path$ replaces $visited\_edges^T$.\\
+It requires linear space for storing the temporary arrays $original\_path$ and $reversed\_path$; it requires respectively linear and quadratic time complexity to compute $original\_path$ and $reversed\_path$; finally a linear time complexity for computing the $lex\leq$ constraint.\\
+We had actually some interesting improvements in the solutions we presented in \hyperref[subsec:experimental-results]{Section 3.2}, both in the number of failures and the values of the objective function, and in the memory usage by the solver.
+Anyway, some instances (pr06 and pr10) would instead not complete, not because it could not find any feasible solution, but for fatal errors happening before the time limit we set, without giving us an explanation.\\
+Since we could not compute all the solutions, we kept the Boolean symmetry breaking constraint that was presented in \hyperref[subsubsec:symmetry-breaking-constraints]{Section 2.3.3}. 
+
+
+\subsubsection{Ordered routes in the implemented model}
+\label{subsubsec:ordered-routes-implemented-model}
+While developing the model we found a combination of variables and constraints that would allow the solver to compute both the two arrays $next$ and $vehicle$ and the ordered routes for each vehicle and store them in some arrays.
+In fact, the array $next$ only stores the \textit{global route} and with that the vehicle ordered routes can be extracted, looping on it with any other non-mathematical programming language (for example, using a \texttt{while} statement).\\
+We decided not to use it in the final model since it slows down the computation a lot.\\
+The variable that would be needed for this kind of ``additional feature" is the following:
+\begin{itemize}
+    \item $routes \in \{0,\dots,n\}^{NumVehicles\times{}n}$: each item $routes_{v,i}$ represents the $i$-th customer that is visited by vehicle $v$ after leaving the depot and before returning in it. If $routes_{v,i} = 0, i>1$ then the vehicle has already come back to the depot. If $routes_{v,i} = 0, i=1$, vehicle $v$ has never left the depot.
+\end{itemize}
+While the constraint would look like this:
+\begin{center}
+    \begin{math}
+        routes_{v,1} =
+        \begin{cases}
+            0, & vehicle_{n+2v-1} \neq v \vee next_{n+2v-1} > n \\
+            next_{n+2v-1}, & vehicle_{n+2v-1} = v \wedge next_{n+2v-1} \leq n
+        \end{cases},
+        \forall v \in \{1,\dots,NumVehicles\}
+    \end{math}
+\end{center}
+\begin{center}
+    \begin{math}
+        routes_{v,i} =
+        \begin{cases}
+            0, & vehicle_{routes_{v,i-1}} \neq v \vee next_{routes_{v,i-1}} > n\\
+            next_{routes_{v,i-1}}, & vehicle_{routes_{v,i-1}} = v \wedge next_{routes_{v,i-1}} \leq n \\
+        \end{cases},
+    \end{math}\\
+    \begin{math}
+        \forall i \in \{2,\dots,n\},
+        \forall v \in \{1,\dots,NumVehicles\}
+    \end{math}
+\end{center}
+The constraint is split in two (for the subcases $i=1$ and $i>1$) for a better readability.
+
 \end{document}
