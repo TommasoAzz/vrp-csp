@@ -72,14 +72,4 @@ While the constraint would look like this:
     \end{math}
 \end{center}
 The constraint is split in two (for the subcases $i=1$ and $i>1$) for a better readability.
-
-\subsection{Future work and possible improvements}
-To achieve these conclusions we performed a total of 377 tests and we understood that the best search strategy is \textbf{domWdeg, random, Luby restart (L = 250), LNS (85\%)} with $\alpha = 0.3$ and $\beta = 0.7$ or $\alpha = 0.7$ and $\beta = 0.3$. Other tests could be performed to have a stronger proof of these conclusions, for example there are a lot of combinations and changes that could be done:
-\begin{itemize}
-    \item changing the percentage of probability of fixing a variable in LNS search strategy, trying in the range $85 \pm 5$\%;
-    \item changing the parameter $L$ in Luby restart, trying in the range $250 \pm 50$; 
-    \item incrementing the time limit up to 10 minutes to see if the best solution can be found for some instances or if some curves of failures drastically change slope (which means that a better solution is not easy to find);
-    \item trying more weights combinations, perhaps changing the domain of $\alpha$ and $\beta$ in the implemented model from $\{0, \dots, 10\}$ to $\{0, \dots, 100\}$ and requiring $\alpha + \beta = 100$;
-    \item testing the model on more and bigger instances. 
-\end{itemize}
 \end{document}
